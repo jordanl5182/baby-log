@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#F3F4FA" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#11142A" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F4F5F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F131B" media="(prefers-color-scheme: dark)">
 <title>Baby log</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,400..700,100&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   color-scheme: light;
@@ -211,6 +211,119 @@ body.hist .actions{display:none}
 .rec .n{font-family:var(--display);font-variation-settings:"SOFT" 100;font-size:22px;font-weight:500}
 .rec .t{font-size:12px;color:var(--muted);line-height:1.35}
 .more{width:100%;border:0;background:var(--surface-2);padding:13px;font-weight:700;color:var(--feed)}
+/* ---------- v3: refined, professional look ---------- */
+:root{
+  --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#F0F1F4; --ink:#161B26; --muted:#667085; --line:#E4E7EC;
+  --feed:#3E4FD0; --feed-soft:#EEF0FD; --wet:#1F84BF; --dirty:#8C5A2B; --mixed:#7556C2;
+  --sleep:#24806A; --other:#B06A14; --danger:#C0352B; --on-accent:#FFFFFF;
+  --shadow:none;
+  --display:"Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --r-lg:18px; --r-md:12px; --r-sm:9px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0F131B; --surface:#171C26; --surface-2:#1F2531; --ink:#EEF1F6; --muted:#98A2B3; --line:#2A3140;
+    --feed:#8E9BFF; --feed-soft:#232A4D; --wet:#62BDEB; --dirty:#D3A06C; --mixed:#B59CFF;
+    --sleep:#5CC5A6; --other:#E8A75A; --danger:#FF8B78; --on-accent:#0F131B;
+  }
+}
+body{font-feature-settings:"tnum" 1, "cv11" 1}
+.wrap{padding:0 16px 132px}
+
+/* app bar */
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;margin:0 -16px 14px;padding:12px 16px;
+  background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);
+  border-bottom:1px solid var(--line)}
+.name{font-family:var(--display);font-variation-settings:normal;font-weight:700;font-size:22px;letter-spacing:-.02em}
+.status{font-size:12.5px;margin-top:1px}
+.icon-btn{width:40px;height:40px;border-radius:var(--r-md);background:var(--surface)}
+.icon-btn svg{width:20px;height:20px}
+
+/* cards share one quiet treatment */
+.hero,.ribbon,.tot,.card,.list{border:1px solid var(--line);box-shadow:none}
+.banner{border:1px solid color-mix(in srgb,var(--feed) 25%,transparent);border-radius:var(--r-md)}
+
+/* status panel */
+.hero{border-radius:var(--r-lg);padding:18px 18px 16px}
+.hero .label{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.01em}
+.since{font-family:var(--display);font-variation-settings:normal;font-weight:700;font-size:52px;letter-spacing:-.04em;color:var(--ink);margin:4px 0 4px}
+.since small{font-size:20px;font-weight:600;letter-spacing:0;margin:0 6px 0 2px}
+.hero .what{font-size:14px;color:var(--muted)}
+.hero-row{gap:0;margin-top:16px;padding-top:0;border-top:0;grid-template-columns:1fr 1fr;background:var(--surface-2);border-radius:var(--r-md)}
+.mini{padding:12px 14px}
+.mini + .mini{border-left:1px solid var(--line)}
+.mini .k{font-size:12.5px;font-weight:600}
+.mini .v{font-family:var(--display);font-variation-settings:normal;font-size:22px;font-weight:700;letter-spacing:-.02em;margin-top:4px}
+.mini .s,.mini .s2{font-size:12.5px}
+.asleep{border-radius:var(--r-md)}
+.asleep button{border-radius:var(--r-sm)}
+
+/* period switch */
+.days{margin:22px 0 8px}
+.days .seg{display:flex;width:100%}
+.days .seg button{flex:1}
+.seg{border-radius:var(--r-md);padding:3px}
+.seg button{border-radius:var(--r-sm);font-size:14px;padding:8px 12px}
+.seg button[aria-pressed="true"]{box-shadow:0 1px 2px rgba(16,24,40,.08),0 0 0 1px var(--line)}
+.date{font-size:13px}
+
+/* timeline */
+.ribbon{border-radius:var(--r-lg);padding:14px 14px 12px}
+.lane{background:var(--line)}
+.legend{gap:6px 12px;font-size:11.5px;padding-top:10px;border-top:1px solid var(--line)}
+.wlane{border-radius:6px}
+
+/* totals */
+.totals{gap:8px;margin-top:8px}
+.tot{border-radius:var(--r-md);padding:12px}
+.tot .n{font-family:var(--display);font-variation-settings:normal;font-size:24px;font-weight:700;letter-spacing:-.02em}
+.tot .t{font-size:12.5px}
+
+/* compare + history cards */
+.card{border-radius:var(--r-lg);padding:16px}
+.card h3{font-family:var(--display);font-variation-settings:normal;font-size:16px;font-weight:700;letter-spacing:-.01em}
+.bythis{font-size:13.5px}
+.stats .n,.rec .n{font-family:var(--display);font-variation-settings:normal;font-weight:700;letter-spacing:-.02em}
+.rec{border-radius:var(--r-md)}
+
+/* list */
+.filters{margin-top:20px}
+.filters .chip,.chip{border-radius:var(--r-sm);font-size:14px;font-weight:600;padding:8px 12px}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.list{border-radius:var(--r-lg);margin-top:10px}
+.row{grid-template-columns:46px 32px 1fr auto;padding:12px 14px;gap:10px}
+.row .tm{font-size:14px;font-weight:600;color:var(--muted)}
+.badge{width:32px;height:32px;border-radius:var(--r-sm)}
+.badge svg{width:18px;height:18px}
+.row .ti{font-size:15px;font-weight:600}
+.who{font-size:11.5px;font-weight:600}
+.dayhead{font-size:12.5px;padding:9px 14px;border-bottom:1px solid var(--line)}
+
+/* action bar: one calm toolbar instead of four candy buttons */
+.actions{background:var(--surface);border-top:1px solid var(--line);padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px))}
+.actions .in{gap:6px}
+.act{background:none!important;color:var(--ink)!important;box-shadow:none;border:0!important;border-radius:var(--r-md);padding:6px 4px;font-size:12.5px;font-weight:700;gap:4px}
+.act svg{width:22px;height:22px;padding:9px;box-sizing:content-box;border-radius:14px;color:var(--on-accent)}
+.act.feed svg{background:var(--feed)} .act.nappy svg{background:var(--wet)} .act.sleep svg{background:var(--sleep)}
+.act.more svg{background:var(--surface-2);color:var(--ink)}
+.act:active svg{transform:scale(.94)}
+
+/* sheets */
+.sheet .in{border-radius:22px 22px 0 0}
+.sheet h2{font-family:var(--display);font-variation-settings:normal;font-size:20px;font-weight:700;letter-spacing:-.01em}
+.sheet h2 button{border-radius:var(--r-sm);width:34px;height:34px}
+.field > .lab{font-size:13px}
+.amount{border-radius:var(--r-md)}
+.amount button{border-radius:var(--r-sm);width:52px;height:52px}
+.amount input{font-family:var(--display);font-variation-settings:normal;font-weight:700;font-size:44px;letter-spacing:-.03em}
+.tile{border-radius:var(--r-md)}
+.opt{border-radius:var(--r-md)}
+input[type=text],input[type=number],input[type=time],input[type=url],input[type=datetime-local],textarea{border-radius:var(--r-sm)}
+.primary{border-radius:var(--r-md);padding:15px;font-size:16px}
+.ghost{border-radius:var(--r-md)}
+.toast{border-radius:var(--r-md);bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+.backrow .name{font-size:22px!important}
+.legend i.bar{position:static;transform:none;opacity:1;top:auto;left:auto}
 </style>
 </head>
 <body>
@@ -239,10 +352,12 @@ body.hist .actions{display:none}
       <p class="what" id="sinceWhat"></p>
       <div id="asleep"></div>
       <div class="hero-row">
-        <div class="mini"><div class="k">Last nappy</div><div class="v" id="lastNappy">–</div><div class="s" id="lastNappyWhat"></div></div>
+        <div class="mini"><div class="k">Since last nappy</div><div class="v" id="lastNappy">–</div><div class="s" id="lastNappyWhat"></div></div>
         <div class="mini"><div class="k">Today’s milk</div><div class="v" id="todayMl">–</div><div class="s" id="todayFeeds"></div><div class="s2" id="weekAvgMl"></div></div>
       </div>
     </section>
+
+    <section class="card" id="formula"></section>
 
     <div class="days">
       <div class="seg" role="group" aria-label="Period">
@@ -422,9 +537,13 @@ function all(){
     if (op.action === 'delete') byId.delete(op.id);
     else byId.set(op.entry.id, op.entry);
   }
-  cacheAll = [...byId.values()].map(e => (e._t = new Date(e.time).getTime(), e)).sort((a, b) => b._t - a._t);
+  const list = [...byId.values()].map(e => (e._t = new Date(e.time).getTime(), e)).sort((a, b) => b._t - a._t);
+  cacheStock = list.filter(e => e.type === 'stock');
+  cacheAll = list.filter(e => e.type !== 'stock');
   return cacheAll;
 }
+let cacheStock = [];
+function stockList(){ all(); return cacheStock; }
 const dirty = () => { cacheAll = null; };
 function between(a, b){ return all().filter(e => e._t >= a && e._t < b); }
 function forDay(off){ return between(dayStart(off).getTime(), dayStart(off + 1).getTime()); }
@@ -455,7 +574,7 @@ function render(){
   document.title = (cfg.baby || 'Baby') + ' log';
   document.body.classList.toggle('hist', view.hist);
   renderStatus(); renderBanner();
-  if (view.hist) renderHistory(); else { renderHero(); renderDay(); }
+  if (view.hist) renderHistory(); else { renderHero(); renderFormula(); renderDay(); }
 }
 function renderStatus(){
   const el = $('#status');
@@ -493,7 +612,7 @@ function renderHero(){
     $('#since').innerHTML = h ? `${h}<small>h</small> ${r}<small>m</small>` : `${r}<small>m</small>`;
     $('#sinceWhat').textContent = feedTitle(feed) + ' at ' + hm(new Date(feed.time));
   } else { $('#since').textContent = '–'; $('#sinceWhat').textContent = 'No feeds logged yet'; }
-  $('#lastNappy').textContent = nappy ? ago(nappy.time) + ' ago' : '–';
+  $('#lastNappy').textContent = nappy ? ago(nappy.time) : '–';
   $('#lastNappyWhat').textContent = nappy ? title(nappy) + ', ' + hm(new Date(nappy.time)) : '';
   const today = forDay(0).filter(e => e.type === 'feed');
   const total = today.reduce((s, e) => s + ml(e), 0);
@@ -639,6 +758,98 @@ function renderCompare(){
       <span></span><div class="hours2"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>
     </div>
     <div class="bythis">${label} by ${hm(new Date())}:<br>Today ${fmt(td)}<br>Yesterday ${fmt(yd)}<br>7-day average ${wk.n == null ? 'not enough data' : fmt(wk)}</div>`;
+}
+
+/* ---------- formula stock ---------- */
+const FORMULA_DEFAULTS = {tin: 400, scoops: 5, ml: 165, scoop: 4.6};
+function stockOf(detail){ return stockList().filter(e => e.detail === detail); }
+function formulaCfg(){
+  const s = stockOf('settings')[0], out = Object.assign({}, FORMULA_DEFAULTS);
+  if (s) String(s.value).split(';').forEach(p => { const kv = p.split('='); if (kv[0] in out && Number(kv[1]) > 0) out[kv[0]] = Number(kv[1]); });
+  return out;
+}
+function spareTins(){ const s = stockOf('spares')[0]; return s ? Math.max(0, Number(s.value) || 0) : 0; }
+function stockEntry(detail, value){
+  return {id: uid(), time: new Date().toISOString(), type: 'stock', detail: detail, amount_ml: '', duration_min: '',
+    value: String(value), supplements: [], notes: '', source: 'app', by: cfg.by || ''};
+}
+function formulaStatus(){
+  const f = formulaCfg(), opened = stockOf('opened')[0];
+  if (!opened) return null;
+  const gPerMl = f.scoops * f.scoop / f.ml, tinG = Number(opened.value) || f.tin;
+  const usedMl = all().filter(e => e.type === 'feed' && e.detail === 'formula' && e._t >= opened._t).reduce((s, e) => s + ml(e), 0);
+  const left = Math.max(0, tinG - usedMl * gPerMl);
+  let sum = 0, n = 0;
+  for (let d = 1; d <= 7; d++) {
+    const s0 = dayStart(-d).getTime(), list = between(s0, s0 + 86400000);
+    if (!list.length) continue;
+    sum += list.filter(e => e.type === 'feed' && e.detail === 'formula').reduce((s, e) => s + ml(e), 0); n++;
+  }
+  const dailyG = n ? sum / n * gPerMl : 0, spares = spareTins();
+  return {f: f, opened: opened, tinG: tinG, left: left, pct: tinG ? left / tinG : 0, bottles: Math.floor(left / (f.scoops * f.scoop)),
+    dailyG: dailyG, days: dailyG ? left / dailyG : null, spares: spares, allDays: dailyG ? (left + spares * f.tin) / dailyG : null};
+}
+function whenFromNow(days){
+  const d = new Date(Date.now() + days * 86400000), h = d.getHours();
+  const part = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+  return d.toLocaleDateString('en-GB', {weekday: 'short', day: 'numeric', month: 'short'}) + ' ' + part;
+}
+const daysText = n => n < 1 ? 'less than a day' : n < 1.5 ? 'about a day' : 'about ' + Math.round(n) + ' days';
+function renderFormula(){
+  const el = $('#formula'); if (!el) return;
+  const st = formulaStatus();
+  if (!st) {
+    el.innerHTML = '<h3>Formula stock</h3><p class="hint" style="margin:0 0 12px;font-size:14px">See how much is left in the tin and when you’ll need more.  Start by telling the app you’ve opened a tin.</p>' +
+      '<button class="primary" data-opentin style="margin:0">I’ve opened a new tin</button>' +
+      '<button class="ghost" data-open="formula">Tin size and scoops</button>';
+    return;
+  }
+  const low = st.allDays != null && st.allDays < 3;
+  const col = st.pct < 0.2 ? 'var(--danger)' : 'var(--feed)';
+  el.innerHTML = '<h3>Formula stock <button class="linky" data-open="formula">Edit</button></h3>' +
+    '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">' +
+      '<div><span style="font-size:26px;font-weight:700;letter-spacing:-.02em">' + Math.round(st.left) + ' g</span>' +
+      '<span class="hint" style="margin-left:6px">left of ' + st.tinG + ' g</span></div>' +
+      '<div class="hint" style="margin:0">' + st.bottles + ' bottles</div></div>' +
+    '<div style="height:8px;border-radius:4px;background:var(--surface-2);margin:10px 0 12px;overflow:hidden">' +
+      '<div style="height:100%;width:' + Math.round(st.pct * 100) + '%;background:' + col + ';border-radius:4px"></div></div>' +
+    '<div class="bythis" style="margin-top:0;padding-top:0;border-top:0">' +
+      (st.days == null ? 'Not enough feeds logged yet to estimate.' :
+        'This tin: ' + daysText(st.days) + ', until around ' + whenFromNow(st.days) + '.<br>' +
+        (st.spares ? st.spares + (st.spares === 1 ? ' spare tin' : ' spare tins') + ': ' + daysText(st.allDays) + ' in total, until around ' + whenFromNow(st.allDays) + '.'
+                   : 'No spare tins in the cupboard.')) +
+      (low ? '<br><b style="color:var(--danger)">Time to buy more formula.</b>' : '') + '</div>' +
+    '<button class="ghost" data-opentin>Opened a new tin</button>';
+}
+function formulaSheetHtml(){
+  const f = formulaCfg();
+  const num = (id, label, v, hint) => '<div class="field"><div class="lab">' + label + '</div><input type="number" inputmode="decimal" id="' + id + '" value="' + v + '">' + (hint ? '<div class="hint">' + hint + '</div>' : '') + '</div>';
+  return head('Formula stock') +
+    num('fTin', 'Tin size (g)', f.tin) +
+    num('fScoops', 'Scoops per bottle', f.scoops) +
+    num('fMl', 'Millilitres of milk that makes', f.ml) +
+    num('fScoop', 'Grams per scoop', f.scoop, 'Check the side of your tin for the scoop weight.') +
+    '<div class="field"><div class="lab">Spare tins in the cupboard</div><div class="amount"><button data-spares="-1" aria-label="One fewer">−</button>' +
+      '<div class="mid"><input id="fSpares" type="number" inputmode="numeric" min="0" value="' + spareTins() + '"><span class="unit">tins</span></div>' +
+      '<button data-spares="1" aria-label="One more">+</button></div></div>' +
+    '<div class="foot"><button class="primary" data-savestock>Save</button><button class="ghost" data-opentin>Opened a new tin now</button></div>';
+}
+function saveStock(){
+  const f = formulaCfg(), g = id => Number($('#' + id).value);
+  const next = {tin: g('fTin'), scoops: g('fScoops'), ml: g('fMl'), scoop: g('fScoop')};
+  for (const k in next) if (!(next[k] > 0)) next[k] = f[k];
+  if (Object.keys(next).some(k => next[k] !== f[k]))
+    queue({action: 'add', entry: stockEntry('settings', Object.keys(next).map(k => k + '=' + next[k]).join(';'))});
+  const sp = Math.max(0, Math.round(g('fSpares') || 0));
+  if (sp !== spareTins()) queue({action: 'add', entry: stockEntry('spares', sp)});
+  closeSheet(); toast('Formula stock saved');
+}
+function openTin(){
+  const f = formulaCfg(), sp = spareTins();
+  queue({action: 'add', entry: stockEntry('opened', f.tin)});
+  if (sp > 0) queue({action: 'add', entry: stockEntry('spares', sp - 1)});
+  if (D) closeSheet();
+  toast('New ' + f.tin + ' g tin started' + (sp > 0 ? ', ' + (sp - 1) + ' spare left' : ''));
 }
 
 /* ---------- history ---------- */
@@ -892,6 +1103,7 @@ function drawSheet(){
       timeField() + notesField() + footer('Log ' + o.k.toLowerCase(), 'other');
   }
   else if (D.kind === 'settings') h = settingsHtml();
+  else if (D.kind === 'formula') h = formulaSheetHtml();
   $('#sheetIn').innerHTML = h;
   const mlIn = $('#mlIn');
   if (mlIn) mlIn.addEventListener('focus', () => mlIn.select());
@@ -945,6 +1157,9 @@ document.addEventListener('click', ev => {
   if (d.firstby) { cfg.by = d.firstby; store.set('bl.cfg', cfg); toast('Hi ' + cfg.by); return renderBanner(); }
   if ('install' in d) { if (installPrompt) { installPrompt.prompt(); installPrompt.userChoice.then(c => { if (c.outcome === 'accepted') store.set('bl.installed', true); installPrompt = null; renderBanner(); }); } return; }
   if (d.open) { if (D) closeSheet(); return setTimeout(() => openSheet(d.open), 0); }
+  if ('opentin' in d) return openTin();
+  if ('savestock' in d) return saveStock();
+  if (d.spares) { const i = $('#fSpares'); i.value = Math.max(0, (Number(i.value) || 0) + Number(d.spares)); return; }
   if (d.edit) { const e = all().find(x => x.id === d.edit); if (e) openSheet(e.type, e); return; }
   if ('wake' in d) { const s = openSleep(); if (s) { const e = Object.assign(strip(s), {duration_min: Math.max(1, Math.round((Date.now() - s._t) / 60000))}); queue({action:'update', entry:e}); toast('Woke up after ' + dur(e.duration_min)); } return; }
   if (!D) return;
