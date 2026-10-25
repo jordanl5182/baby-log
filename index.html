@@ -357,8 +357,6 @@ input[type=text],input[type=number],input[type=time],input[type=url],input[type=
       </div>
     </section>
 
-    <section class="card" id="formula"></section>
-
     <div class="days">
       <div class="seg" role="group" aria-label="Period">
         <button data-day="0" aria-pressed="true">Today</button>
@@ -366,9 +364,12 @@ input[type=text],input[type=number],input[type=time],input[type=url],input[type=
         <button data-day="week" aria-pressed="false">This week</button>
       </div>
     </div>
-    <div class="date" id="dateLabel" style="margin:-4px 2px 10px"></div>
+    <div class="date" id="dateLabel" style="margin:-4px 2px 0"></div>
 
-    <div class="ribbon" aria-label="At a glance">
+    <div class="filters" id="filters" role="group" aria-label="Show" style="margin-top:8px"></div>
+    <div class="list" id="list"></div>
+
+    <div class="ribbon" aria-label="At a glance" style="margin-top:14px">
       <div id="lanesWrap"></div>
       <div class="legend">
         <span><i style="background:var(--feed)"></i>Feed (bigger dot = more ml)</span>
@@ -383,8 +384,7 @@ input[type=text],input[type=number],input[type=time],input[type=url],input[type=
 
     <section class="card" id="compare"></section>
 
-    <div class="filters" id="filters" role="group" aria-label="Show"></div>
-    <div class="list" id="list"></div>
+    <section class="card" id="formula"></section>
   </main>
 
   <main id="history">
