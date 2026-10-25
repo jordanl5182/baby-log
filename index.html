@@ -155,6 +155,62 @@ textarea{min-height:70px;resize:vertical}
 .toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 .toast button{border:0;background:none;color:var(--bg);font-weight:800;text-decoration:underline;padding:0}
 @media (prefers-reduced-motion: reduce){ .sheet,.scrim,.toast{transition:none} }
+/* v2 additions */
+.head-btns{display:flex;gap:8px}
+.days{margin:26px 2px 12px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted);margin-top:10px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%}
+.legend i.bar{width:16px;height:6px;border-radius:3px;background:var(--sleep)}
+.mini .s2{font-size:12px;color:var(--muted);margin-top:4px}
+.weekrows{display:grid;gap:6px}
+.weekrow{display:grid;grid-template-columns:34px 1fr;align-items:center;gap:8px}
+.weekrow .dl{font-size:12px;font-weight:600;color:var(--muted)}
+.weekrow .dl.today{color:var(--ink)}
+.wlane{position:relative;height:22px;border-radius:6px;background:var(--surface-2)}
+.wlane .dot{top:50%}
+.wlane .bar{top:50%;height:6px}
+.card{background:var(--surface);border-radius:20px;padding:14px;margin-top:14px}
+.card h3{font-family:var(--display);font-variation-settings:"SOFT" 100,"opsz" 36;font-weight:600;font-size:20px;margin:0 0 10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.seg.small button{padding:7px 11px;font-size:13px}
+.cmp{display:grid;grid-template-columns:72px 1fr;gap:8px 10px;align-items:center}
+.cmp .rl{font-size:12px;font-weight:600;color:var(--muted)}
+.hours2{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.avgbars{display:flex;align-items:flex-end;height:22px;gap:1px;background:var(--surface-2);border-radius:6px;padding:0 2px;overflow:hidden}
+.avgbars i{flex:1;border-radius:2px 2px 0 0;min-height:0}
+.bythis{font-size:14px;line-height:1.5;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.bythis b{font-weight:700}
+.filters{display:flex;gap:6px;overflow-x:auto;margin:18px -2px 0;padding:2px}
+.filters .chip{padding:7px 13px;font-size:14px;white-space:nowrap}
+.dayhead{padding:10px 14px 6px;font-size:13px;font-weight:700;color:var(--muted);background:var(--surface-2)}
+.amount input{width:140px;text-align:center;border:0;background:none;font-family:var(--display);font-variation-settings:"SOFT" 100,"opsz" 144;font-size:48px;font-weight:500;letter-spacing:-.02em;padding:0;-moz-appearance:textfield}
+.amount input::-webkit-outer-spin-button,.amount input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.amount .unit{font-size:20px;color:var(--muted)}
+.amount .mid{display:flex;align-items:baseline;justify-content:center;gap:4px}
+input[type=datetime-local]{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px 14px;font-size:16px}
+.newtype{display:flex;gap:8px;margin-top:10px}
+.newtype input{flex:1}
+.newtype button{border:0;border-radius:14px;padding:0 16px;font-weight:700;background:var(--other);color:var(--on-accent)}
+/* history */
+#history{display:none}
+body.hist #home{display:none}
+body.hist #history{display:block}
+body.hist .actions{display:none}
+.backrow{display:flex;align-items:center;gap:10px;margin:0 0 14px}
+.chart{width:100%;height:150px;display:block}
+.chart text{font-family:var(--body);font-size:10px;fill:var(--muted)}
+.chart .lab{font-size:9px}
+.pcard{border-top:1px solid var(--line);padding:12px 0}
+.pcard:first-of-type{border-top:0;padding-top:4px}
+.pcard .pt{font-weight:700;font-size:15px;margin-bottom:6px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats .n{font-family:var(--display);font-variation-settings:"SOFT" 100;font-size:20px;font-weight:500}
+.stats .t{font-size:12px;color:var(--muted);line-height:1.35}
+.recs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rec{background:var(--surface-2);border-radius:14px;padding:10px 12px}
+.rec .n{font-family:var(--display);font-variation-settings:"SOFT" 100;font-size:22px;font-weight:500}
+.rec .t{font-size:12px;color:var(--muted);line-height:1.35}
+.more{width:100%;border:0;background:var(--surface-2);padding:13px;font-weight:700;color:var(--feed)}
 </style>
 </head>
 <body>
@@ -164,39 +220,76 @@ textarea{min-height:70px;resize:vertical}
       <h1 class="name" id="babyName">Baby</h1>
       <div class="status" id="status"><i></i><span>Loading</span></div>
     </div>
-    <button class="icon-btn" id="settingsBtn" aria-label="Settings">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
-    </button>
+    <div class="head-btns">
+      <button class="icon-btn" id="histBtn" aria-label="History">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+      </button>
+      <button class="icon-btn" id="settingsBtn" aria-label="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+    </div>
   </header>
 
   <div id="banner"></div>
 
-  <section class="hero" aria-live="polite">
-    <p class="label">Since last feed</p>
-    <div class="since" id="since">–</div>
-    <p class="what" id="sinceWhat"></p>
-    <div id="asleep"></div>
-    <div class="hero-row">
-      <div class="mini"><div class="k">Last nappy</div><div class="v" id="lastNappy">–</div><div class="s" id="lastNappyWhat"></div></div>
-      <div class="mini"><div class="k">Today’s milk</div><div class="v" id="todayMl">–</div><div class="s" id="todayFeeds"></div></div>
+  <main id="home">
+    <section class="hero" aria-live="polite">
+      <p class="label">Since last feed</p>
+      <div class="since" id="since">–</div>
+      <p class="what" id="sinceWhat"></p>
+      <div id="asleep"></div>
+      <div class="hero-row">
+        <div class="mini"><div class="k">Last nappy</div><div class="v" id="lastNappy">–</div><div class="s" id="lastNappyWhat"></div></div>
+        <div class="mini"><div class="k">Today’s milk</div><div class="v" id="todayMl">–</div><div class="s" id="todayFeeds"></div><div class="s2" id="weekAvgMl"></div></div>
+      </div>
+    </section>
+
+    <div class="days">
+      <div class="seg" role="group" aria-label="Period">
+        <button data-day="0" aria-pressed="true">Today</button>
+        <button data-day="-1" aria-pressed="false">Yesterday</button>
+        <button data-day="week" aria-pressed="false">This week</button>
+      </div>
     </div>
-  </section>
+    <div class="date" id="dateLabel" style="margin:-4px 2px 10px"></div>
 
-  <div class="days">
-    <div class="seg" role="group" aria-label="Day">
-      <button id="dToday" aria-pressed="true">Today</button>
-      <button id="dYest" aria-pressed="false">Yesterday</button>
+    <div class="ribbon" aria-label="At a glance">
+      <div id="lanesWrap"></div>
+      <div class="legend">
+        <span><i style="background:var(--feed)"></i>Feed (bigger dot = more ml)</span>
+        <span><i class="bar"></i>Sleep</span>
+        <span><i style="background:var(--wet)"></i>Wet</span>
+        <span><i style="background:var(--dirty)"></i>Dirty</span>
+        <span><i style="background:var(--mixed)"></i>Both</span>
+      </div>
     </div>
-    <div class="date" id="dateLabel"></div>
-  </div>
 
-  <div class="ribbon" aria-label="Day at a glance">
-    <div class="lanes" id="lanes"></div>
-    <div class="hours"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>
-  </div>
+    <div class="totals" id="totals"></div>
 
-  <div class="totals" id="totals"></div>
-  <div class="list" id="list"></div>
+    <section class="card" id="compare"></section>
+
+    <div class="filters" id="filters" role="group" aria-label="Show"></div>
+    <div class="list" id="list"></div>
+  </main>
+
+  <main id="history">
+    <div class="backrow"><button class="icon-btn" id="backBtn" aria-label="Back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <h2 class="name" style="font-size:26px;margin:0">History</h2></div>
+    <div class="seg" role="group" aria-label="Group by">
+      <button data-gran="week" aria-pressed="true">Weeks</button>
+      <button data-gran="month" aria-pressed="false">Months</button>
+      <button data-gran="year" aria-pressed="false">Years</button>
+    </div>
+    <section class="card" id="histChart"></section>
+    <section class="card" id="histPeriods"></section>
+    <section class="card" id="records"></section>
+    <section class="card" style="padding:14px 0 0;overflow:hidden">
+      <h3 style="padding:0 14px">All entries</h3>
+      <div class="filters" id="hfilters" style="margin:0 12px 10px"></div>
+      <div id="hlist"></div>
+    </section>
+  </main>
 </div>
 
 <nav class="actions" aria-label="Log something">
@@ -228,6 +321,7 @@ const IC = {
   weight:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 8h12l2 12H4z"/><circle cx="12" cy="5" r="2"/></svg>',
   bath:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h18v2a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5z"/><path d="M6 12V5a2 2 0 0 1 4 0"/></svg>',
   tummy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="7" cy="9" r="3"/><path d="M3 18c2-4 6-5 9-4l9 2"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
   note:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 4h14v16H5zM9 9h6M9 13h6M9 17h3"/></svg>'
 };
 const OTHER = [
@@ -241,14 +335,17 @@ const OTHER = [
   {k:'Note', ic:'note', ph:''}
 ];
 
+const BUILTIN_OTHER = OTHER.map(o => o.k);
+
 /* ---------- storage ---------- */
 const mem = {};
 const store = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); }catch(e){ return k in mem ? mem[k] : d; } },
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){ mem[k] = v; } }
 };
-let cfg = Object.assign({api:'', key:'', by:'', baby:'Constance',
+let cfg = Object.assign({api:'', key:'', by:'', baby:'Constance', custom:[],
   supps:['Vitamin D','Infacol','Colief','Gaviscon','Probiotic']}, store.get('bl.cfg', {}));
+if (!Array.isArray(cfg.custom)) cfg.custom = [];
 (function readSetupLink(){
   const h = new URLSearchParams(location.hash.slice(1));
   if (!h.get('api')) return;
@@ -261,19 +358,27 @@ const isDemo = () => !cfg.api || !cfg.key;
 
 let entries = store.get('bl.cache', []);
 let outbox = store.get('bl.outbox', []);
-let meta = store.get('bl.meta', {lastSync:'', lastBackup:'', sheetUrl:''});
-let dayOffset = 0;
+let meta = store.get('bl.meta', {lastSync:'', lastFull:'', lastBackup:'', sheetUrl:''});
+let view = {day: 0, filter: 'all', cmp: 'feed', gran: 'week', hfilter: 'all', hdays: 7, hist: false};
 let syncState = 'ok';
 
 /* ---------- time helpers ---------- */
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pad = n => String(n).padStart(2, '0');
-function dayStart(off){ const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() + off); return d; }
+function dayStart(off, from){ const d = from ? new Date(from) : new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() + off); return d; }
+function weekStart(d){ const x = dayStart(0, d); const wd = (x.getDay() + 6) % 7; x.setDate(x.getDate() - wd); return x; }
 const hm = d => pad(d.getHours()) + ':' + pad(d.getMinutes());
+const dkey = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const fmtDay = d => d.toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short'});
+const fmtShort = d => d.toLocaleDateString('en-GB', {day:'numeric', month:'short'});
 function dur(min){ min = Math.max(0, Math.round(min)); if (min < 60) return min + 'm'; const h = Math.floor(min/60), m = min % 60; return h + 'h' + (m ? ' ' + m + 'm' : ''); }
 function ago(t){ return dur((Date.now() - new Date(t).getTime()) / 60000); }
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+const toLocalInput = d => d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + 'T' + hm(d);
+const isOpenSleep = e => e.type === 'sleep' && (e.duration_min === '' || e.duration_min == null);
+const ml = e => Number(e.amount_ml) || 0;
+const round = (n, p) => { const f = Math.pow(10, p || 0); return Math.round(n * f) / f; };
 
 /* ---------- labels ---------- */
 function feedTitle(e){
@@ -286,47 +391,71 @@ function feedTitle(e){
 function title(e){
   if (e.type === 'feed') return feedTitle(e);
   if (e.type === 'nappy') return e.detail === 'mixed' ? 'Wet and dirty' : e.detail === 'dirty' ? 'Dirty nappy' : 'Wet nappy';
-  if (e.type === 'sleep') return e.duration_min === '' || e.duration_min == null ? 'Asleep' : 'Slept ' + dur(e.duration_min);
+  if (e.type === 'sleep') return isOpenSleep(e) ? 'Asleep' : 'Slept ' + dur(e.duration_min);
   return e.detail + (e.value ? ': ' + e.value : '');
 }
 function sub(e){
   const bits = [];
   if (e.type === 'feed' && e.detail && e.detail.startsWith('breast') && e.duration_min) bits.push(dur(e.duration_min));
-  if (e.supplements && e.supplements.length) bits.push('with ' + e.supplements.join(', '));
-  if (e.type === 'sleep' && e.duration_min !== '' && e.duration_min != null)
-    bits.push('until ' + hm(new Date(new Date(e.time).getTime() + e.duration_min * 60000)));
+  if (e.supplements && e.supplements.length) bits.push('with ' + [].concat(e.supplements).join(', '));
+  if (e.type === 'sleep' && !isOpenSleep(e)) bits.push('until ' + hm(new Date(new Date(e.time).getTime() + e.duration_min * 60000)));
   if (e.notes) bits.push(e.notes);
   return bits.join('. ');
 }
+function otherIcon(k){ return (OTHER.find(o => o.k === k) || {ic:'note'}).ic; }
 function badge(e){
   const map = {feed:['feed','--feed'], wet:['wet','--wet'], dirty:['dirty','--dirty'], mixed:['mixed','--mixed'], sleep:['sleep','--sleep']};
-  let k = e.type === 'nappy' ? e.detail : e.type;
+  const k = e.type === 'nappy' ? e.detail : e.type;
   let [icon, col] = map[k] || ['note','--other'];
   if (e.type === 'feed' && e.detail.startsWith('breast')) icon = 'breast';
-  if (e.type === 'other') icon = (OTHER.find(o => o.k === e.detail) || {ic:'note'}).ic;
+  if (e.type === 'other') icon = otherIcon(e.detail);
   return `<span class="badge" style="color:var(${col});background:color-mix(in srgb,var(${col}) 15%,transparent)">${IC[icon]}</span>`;
 }
+const who = e => e.source === 'alexa' ? 'Alexa' : e.source === 'baby-tracker' ? '' : (e.by || '');
 
-/* ---------- data view ---------- */
+/* ---------- data ---------- */
+let cacheAll = null;
 function all(){
-  let list = entries.slice();
+  if (cacheAll) return cacheAll;
+  const byId = new Map(entries.map(e => [e.id, e]));
   for (const op of outbox) {
-    if (op.action === 'delete') list = list.filter(e => e.id !== op.id);
-    else { list = list.filter(e => e.id !== op.entry.id); list.push(op.entry); }
+    if (op.action === 'delete') byId.delete(op.id);
+    else byId.set(op.entry.id, op.entry);
   }
-  return list.sort((a, b) => b.time.localeCompare(a.time));
+  cacheAll = [...byId.values()].map(e => (e._t = new Date(e.time).getTime(), e)).sort((a, b) => b._t - a._t);
+  return cacheAll;
 }
-function forDay(off){
-  const a = dayStart(off).getTime(), b = dayStart(off + 1).getTime();
-  return all().filter(e => { const t = new Date(e.time).getTime(); return t >= a && t < b; });
+const dirty = () => { cacheAll = null; };
+function between(a, b){ return all().filter(e => e._t >= a && e._t < b); }
+function forDay(off){ return between(dayStart(off).getTime(), dayStart(off + 1).getTime()); }
+const openSleep = () => all().find(isOpenSleep);
+const FILTERS = [['all','All'],['feed','Feeds'],['nappy','Nappies'],['sleep','Sleep'],['other','Other']];
+const applyFilter = (list, f) => f === 'all' ? list : list.filter(e => e.type === f);
+function otherTypes(){
+  const seen = new Set(BUILTIN_OTHER);
+  const extra = [];
+  for (const k of cfg.custom.concat(all().filter(e => e.type === 'other').map(e => e.detail)))
+    if (k && !seen.has(k)) { seen.add(k); extra.push(k); }
+  return extra;
 }
-const openSleep = () => all().find(e => e.type === 'sleep' && (e.duration_min === '' || e.duration_min == null));
+// average over previous 7 days of something measured from midnight to the current time of day
+function weekAvgByNow(fn){
+  const into = Date.now() - dayStart(0).getTime(); let sum = 0, n = 0;
+  for (let d = 1; d <= 7; d++) {
+    const s = dayStart(-d).getTime(); const list = between(s, s + into);
+    if (!between(s, s + 86400000).length) continue;
+    sum += fn(list); n++;
+  }
+  return n ? sum / n : null;
+}
 
 /* ---------- render ---------- */
 function render(){
   $('#babyName').textContent = cfg.baby || 'Baby';
   document.title = (cfg.baby || 'Baby') + ' log';
-  renderStatus(); renderBanner(); renderHero(); renderDay();
+  document.body.classList.toggle('hist', view.hist);
+  renderStatus(); renderBanner();
+  if (view.hist) renderHistory(); else { renderHero(); renderDay(); }
 }
 function renderStatus(){
   const el = $('#status');
@@ -347,7 +476,7 @@ function renderBanner(){
   if (isDemo()) h += `<div class="banner">This is demo data, so nothing is saved yet. <button data-open="settings">Connect your Google Sheet</button> to start logging for real.</div>`;
   else if (!cfg.by) h += `<div class="banner"><strong>Who’s using this phone?</strong>
       <div class="chips" style="margin-top:10px">${['Jordan','Millie'].map(n => `<button class="chip" data-firstby="${n}">${n}</button>`).join('')}</div></div>`;
-  if (!isDemo() && !installed()) {
+  if (!isDemo() && !installed() && !view.hist) {
     h += installPrompt
       ? `<div class="banner install"><span>Add this app to your home screen so it opens like any other app.</span><button class="primary" data-install style="margin-top:10px">Install app</button></div>`
       : `<div class="banner install">To add this app to your home screen, tap Chrome’s <strong>⋮</strong> menu, then <strong>Install app</strong> or <strong>Add to home screen</strong>.</div>`;
@@ -359,7 +488,7 @@ function renderHero(){
   const feed = list.find(e => e.type === 'feed');
   const nappy = list.find(e => e.type === 'nappy');
   if (feed) {
-    const m = Math.max(0, Math.round((Date.now() - new Date(feed.time)) / 60000));
+    const m = Math.max(0, Math.round((Date.now() - feed._t) / 60000));
     const h = Math.floor(m / 60), r = m % 60;
     $('#since').innerHTML = h ? `${h}<small>h</small> ${r}<small>m</small>` : `${r}<small>m</small>`;
     $('#sinceWhat').textContent = feedTitle(feed) + ' at ' + hm(new Date(feed.time));
@@ -367,58 +496,238 @@ function renderHero(){
   $('#lastNappy').textContent = nappy ? ago(nappy.time) + ' ago' : '–';
   $('#lastNappyWhat').textContent = nappy ? title(nappy) + ', ' + hm(new Date(nappy.time)) : '';
   const today = forDay(0).filter(e => e.type === 'feed');
-  const ml = today.reduce((s, e) => s + (Number(e.amount_ml) || 0), 0);
-  $('#todayMl').textContent = ml + ' ml';
+  const total = today.reduce((s, e) => s + ml(e), 0);
+  $('#todayMl').textContent = total + ' ml';
   $('#todayFeeds').textContent = today.length + (today.length === 1 ? ' feed' : ' feeds');
+  const avg = weekAvgByNow(l => l.filter(e => e.type === 'feed').reduce((s, e) => s + ml(e), 0));
+  $('#weekAvgMl').textContent = avg == null ? '' : 'Week average by ' + hm(new Date()) + ': ' + Math.round(avg) + ' ml';
   const s = openSleep();
   $('#asleep').innerHTML = s ? `<div class="asleep"><span>Asleep for ${ago(s.time)}</span><button data-wake>Woke up</button></div>` : '';
 }
-function renderDay(){
-  $('#dToday').setAttribute('aria-pressed', dayOffset === 0);
-  $('#dYest').setAttribute('aria-pressed', dayOffset === -1);
-  $('#dateLabel').textContent = dayStart(dayOffset).toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short'});
-  const list = forDay(dayOffset);
-  const start = dayStart(dayOffset).getTime();
-  const pct = t => Math.min(100, Math.max(0, (new Date(t).getTime() - start) / 864000));
 
-  // ribbon: feeds on top lane, sleep in the middle, nappies below
-  let html = `<div class="lane" style="top:14px"></div><div class="lane" style="top:37px"></div><div class="lane" style="top:60px"></div>`;
+function laneMarks(list, start, span, lanes){
+  const pct = t => Math.min(100, Math.max(0, (t - start) / span * 100));
+  let html = '';
   for (const e of list) {
-    if (e.type === 'feed') {
-      const size = e.amount_ml ? Math.min(18, 8 + e.amount_ml / 18) : 11;
-      html += `<span class="dot feed" title="${esc(title(e))}" style="left:${pct(e.time)}%;top:14px;width:${size}px;height:${size}px"></span>`;
-    } else if (e.type === 'nappy') {
-      html += `<span class="dot ${esc(e.detail)}" style="left:${pct(e.time)}%;top:60px;width:11px;height:11px"></span>`;
-    } else if (e.type === 'sleep') {
-      const endT = e.duration_min === '' || e.duration_min == null ? Date.now() : new Date(e.time).getTime() + e.duration_min * 60000;
-      const a = pct(e.time), b = pct(endT);
-      html += `<span class="bar" style="left:${a}%;width:${Math.max(1, b - a)}%;top:37px"></span>`;
+    if (e.type === 'feed' && lanes.feed != null) {
+      const size = e.amount_ml ? Math.min(16, 7 + ml(e) / 20) : 10;
+      html += `<span class="dot feed" title="${esc(title(e))}" style="left:${pct(e._t)}%;top:${lanes.feed}px;width:${size}px;height:${size}px"></span>`;
+    } else if (e.type === 'nappy' && lanes.nappy != null) {
+      html += `<span class="dot ${esc(e.detail)}" title="${esc(title(e))}" style="left:${pct(e._t)}%;top:${lanes.nappy}px;width:10px;height:10px"></span>`;
+    } else if (e.type === 'sleep' && lanes.sleep != null) {
+      const endT = isOpenSleep(e) ? Date.now() : e._t + e.duration_min * 60000;
+      const a = pct(e._t), b = pct(endT);
+      html += `<span class="bar" style="left:${a}%;width:${Math.max(0.6, b - a)}%;top:${lanes.sleep}px"></span>`;
     }
   }
-  if (dayOffset === 0) html += `<span class="nowline" style="left:${pct(Date.now())}%"></span>`;
-  $('#lanes').innerHTML = html;
+  return html;
+}
+function periodRange(){
+  if (view.day === 'week') { const s = weekStart(new Date()); return [s.getTime(), dayStart(1).getTime()]; }
+  return [dayStart(view.day).getTime(), dayStart(view.day + 1).getTime()];
+}
+function renderDay(){
+  document.querySelectorAll('[data-day]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.day) === String(view.day)));
+  const [a, b] = periodRange();
+  $('#dateLabel').textContent = view.day === 'week'
+    ? fmtShort(new Date(a)) + ' to ' + fmtShort(new Date(b - 1))
+    : fmtDay(new Date(a));
+  const list = between(a, b);
+  const shown = applyFilter(list, view.filter);
+  const lanes = {feed: view.filter === 'all' || view.filter === 'feed' ? 1 : null,
+                 sleep: view.filter === 'all' || view.filter === 'sleep' ? 1 : null,
+                 nappy: view.filter === 'all' || view.filter === 'nappy' ? 1 : null};
+
+  // ribbon
+  if (view.day === 'week') {
+    let rows = '';
+    for (let t = a; t < b; t += 86400000) {
+      const d = new Date(t), isToday = dkey(d) === dkey(new Date());
+      const day = between(t, t + 86400000);
+      rows += `<div class="weekrow"><span class="dl${isToday ? ' today' : ''}">${d.toLocaleDateString('en-GB', {weekday:'short'})}</span>
+        <div class="wlane">${laneMarks(day, t, 86400000, {feed: lanes.feed && 11, sleep: lanes.sleep && 11, nappy: lanes.nappy && 11})}</div></div>`;
+    }
+    $('#lanesWrap').innerHTML = `<div class="weekrows">${rows}</div><div class="hours" style="padding-left:42px"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>`;
+  } else {
+    let html = `<div class="lane" style="top:14px"></div><div class="lane" style="top:37px"></div><div class="lane" style="top:60px"></div>`;
+    html += laneMarks(list, a, 86400000, {feed: lanes.feed && 14, sleep: lanes.sleep && 37, nappy: lanes.nappy && 60});
+    if (view.day === 0) html += `<span class="nowline" style="left:${(Date.now() - a) / 864000}%"></span>`;
+    $('#lanesWrap').innerHTML = `<div class="lanes">${html}</div><div class="hours"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>`;
+  }
 
   // totals
+  const days = Math.max(1, Math.round((Math.min(b, Date.now()) - a) / 86400000 + 0.49));
   const feeds = list.filter(e => e.type === 'feed');
-  const ml = feeds.reduce((s, e) => s + (Number(e.amount_ml) || 0), 0);
+  const total = feeds.reduce((s, e) => s + ml(e), 0);
   const nap = list.filter(e => e.type === 'nappy');
   const c = k => nap.filter(e => e.detail === k).length;
-  const slept = list.filter(e => e.type === 'sleep').reduce((s, e) =>
-    s + (e.duration_min === '' || e.duration_min == null ? (Date.now() - new Date(e.time)) / 60000 : Number(e.duration_min)), 0);
+  const slept = list.filter(e => e.type === 'sleep').reduce((s, e) => s + (isOpenSleep(e) ? (Date.now() - e._t) / 60000 : Number(e.duration_min)), 0);
+  const perDay = view.day === 'week' ? `<br>${Math.round(total / days)} ml a day` : '';
   $('#totals').innerHTML = `
-    <div class="tot"><div class="n">${feeds.length}</div><div class="t">feeds<br>${ml} ml</div></div>
+    <div class="tot"><div class="n">${feeds.length}</div><div class="t">feeds<br>${total} ml${perDay}</div></div>
     <div class="tot"><div class="n">${nap.length}</div><div class="t">nappies<br>${c('wet')} wet, ${c('dirty')} dirty${c('mixed') ? ', ' + c('mixed') + ' both' : ''}</div></div>
     <div class="tot"><div class="n">${slept ? dur(slept) : '0'}</div><div class="t">sleep logged</div></div>`;
 
-  // list
-  $('#list').innerHTML = list.length ? list.map(e => `
-    <button class="row" data-edit="${esc(e.id)}">
+  renderCompare();
+
+  $('#filters').innerHTML = FILTERS.map(([k, l]) => `<button class="chip" data-filter="${k}" aria-pressed="${view.filter === k}">${l}</button>`).join('');
+  $('#list').innerHTML = listHtml(shown, view.day === 'week',
+    view.day === 0 ? 'Nothing logged today yet. Use the buttons below or ask Alexa.' : 'Nothing logged for this period.');
+}
+function rowHtml(e){
+  return `<button class="row" data-edit="${esc(e.id)}">
       <span class="tm">${hm(new Date(e.time))}</span>
       ${badge(e)}
       <span><div class="ti">${esc(title(e))}</div>${sub(e) ? `<div class="su">${esc(sub(e))}</div>` : ''}</span>
-      <span class="who">${e.source === 'alexa' ? 'Alexa' : esc(e.by || '')}</span>
-    </button>`).join('')
-    : `<div class="empty">${dayOffset === 0 ? 'Nothing logged today yet. Use the buttons below or ask Alexa.' : 'Nothing was logged yesterday.'}</div>`;
+      <span class="who">${esc(who(e))}</span>
+    </button>`;
+}
+function listHtml(list, grouped, empty){
+  if (!list.length) return `<div class="empty">${empty}</div>`;
+  if (!grouped) return list.map(rowHtml).join('');
+  let out = '', last = '';
+  for (const e of list) {
+    const k = dkey(new Date(e._t));
+    if (k !== last) { out += `<div class="dayhead">${fmtDay(new Date(e._t))}</div>`; last = k; }
+    out += rowHtml(e);
+  }
+  return out;
+}
+
+/* comparison: today vs yesterday vs the 7-day average */
+function renderCompare(){
+  const kind = view.cmp;
+  const label = {feed:'Feeds', nappy:'Nappies', sleep:'Sleep'}[kind];
+  const t0 = dayStart(0).getTime(), t1 = dayStart(-1).getTime();
+  const pick = l => l.filter(e => e.type === kind);
+  const lane = (start) => `<div class="wlane">${laneMarks(pick(between(start, start + 86400000)), start, 86400000, {[kind]: 11})}${start === t0 ? `<span class="nowline" style="left:${(Date.now() - t0) / 864000}%"></span>` : ''}</div>`;
+  // hourly average over the previous 7 days
+  const hours = new Array(24).fill(0); let days = 0;
+  for (let d = 1; d <= 7; d++) {
+    const s = dayStart(-d).getTime(), l = pick(between(s, s + 86400000));
+    if (!between(s, s + 86400000).length) continue; days++;
+    for (const e of l) {
+      if (kind === 'sleep') {
+        const end = isOpenSleep(e) ? e._t : e._t + e.duration_min * 60000;
+        for (let t = e._t; t < end; t += 3600000) { const h = new Date(t).getHours(); hours[h] += Math.min(60, (end - t) / 60000) / 60; }
+      } else hours[new Date(e._t).getHours()] += 1;
+    }
+  }
+  const avg = hours.map(v => days ? v / days : 0);
+  const max = Math.max(0.0001, ...avg);
+  const col = kind === 'feed' ? '--feed' : kind === 'nappy' ? '--wet' : '--sleep';
+  const bars = `<div class="avgbars">${avg.map(v => `<i style="height:${Math.round(v / max * 100)}%;background:var(${col})"></i>`).join('')}</div>`;
+
+  // "by this time" numbers
+  const into = Date.now() - t0;
+  const measure = l => {
+    const p = pick(l);
+    if (kind === 'feed') return {n: p.length, ml: p.reduce((s, e) => s + ml(e), 0)};
+    if (kind === 'sleep') return {n: p.reduce((s, e) => s + (isOpenSleep(e) ? (Date.now() - e._t) / 60000 : Number(e.duration_min)), 0)};
+    return {n: p.length, dirty: p.filter(e => e.detail !== 'wet').length};
+  };
+  const td = measure(between(t0, Date.now())), yd = measure(between(t1, t1 + into));
+  const wk = {n: weekAvgByNow(l => measure(l).n), ml: weekAvgByNow(l => measure(l).ml || 0), dirty: weekAvgByNow(l => measure(l).dirty || 0)};
+  const fmt = (m) => kind === 'feed' ? `<b>${round(m.n, 1)}</b> feeds, ${Math.round(m.ml)} ml`
+    : kind === 'sleep' ? `<b>${dur(m.n)}</b>` : `<b>${round(m.n, 1)}</b> nappies, ${round(m.dirty, 1)} with poo`;
+  $('#compare').innerHTML = `
+    <h3>Compare <span class="seg small" role="group">${[['feed','Feeds'],['nappy','Nappies'],['sleep','Sleep']].map(([k, l]) => `<button data-cmp="${k}" aria-pressed="${kind === k}">${l}</button>`).join('')}</span></h3>
+    <div class="cmp">
+      <span class="rl">Today</span>${lane(t0)}
+      <span class="rl">Yesterday</span>${lane(t1)}
+      <span class="rl">7-day avg</span>${bars}
+      <span></span><div class="hours2"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>
+    </div>
+    <div class="bythis">${label} by ${hm(new Date())}:<br>Today ${fmt(td)}<br>Yesterday ${fmt(yd)}<br>7-day average ${wk.n == null ? 'not enough data' : fmt(wk)}</div>`;
+}
+
+/* ---------- history ---------- */
+function periodKey(d, gran){
+  if (gran === 'year') return String(d.getFullYear());
+  if (gran === 'month') return d.getFullYear() + '-' + pad(d.getMonth() + 1);
+  return dkey(weekStart(d));
+}
+function periodLabel(key, gran){
+  if (gran === 'year') return key;
+  if (gran === 'month') { const [y, m] = key.split('-'); return new Date(+y, +m - 1, 1).toLocaleDateString('en-GB', {month:'long', year:'numeric'}); }
+  const s = new Date(key + 'T00:00:00'), e = new Date(s); e.setDate(e.getDate() + 6);
+  return fmtShort(s) + ' to ' + fmtShort(e);
+}
+function dailyTotals(){
+  const days = new Map();
+  for (const e of all()) {
+    const k = dkey(new Date(e._t));
+    let d = days.get(k);
+    if (!d) days.set(k, d = {key: k, feeds: 0, ml: 0, nappies: 0, wet: 0, dirty: 0, mixed: 0, sleep: 0});
+    if (e.type === 'feed') { d.feeds++; d.ml += ml(e); }
+    else if (e.type === 'nappy') { d.nappies++; d[e.detail] = (d[e.detail] || 0) + 1; }
+    else if (e.type === 'sleep' && !isOpenSleep(e)) d.sleep += Number(e.duration_min) || 0;
+  }
+  return days;
+}
+function renderHistory(){
+  document.querySelectorAll('[data-gran]').forEach(b => b.setAttribute('aria-pressed', b.dataset.gran === view.gran));
+  const gran = view.gran, days = dailyTotals();
+  const periods = new Map();
+  for (const d of days.values()) {
+    const k = periodKey(new Date(d.key + 'T12:00:00'), gran);
+    let p = periods.get(k);
+    if (!p) periods.set(k, p = {key: k, days: 0, feeds: 0, ml: 0, nappies: 0, wet: 0, dirty: 0, mixed: 0, sleep: 0});
+    p.days++; for (const f of ['feeds','ml','nappies','wet','dirty','mixed','sleep']) p[f] += d[f] || 0;
+  }
+  const list = [...periods.values()].sort((a, b) => b.key.localeCompare(a.key));
+  if (!list.length) { $('#histChart').innerHTML = '<div class="empty">No history yet.</div>'; $('#histPeriods').innerHTML = ''; $('#records').innerHTML = ''; $('#hlist').innerHTML = ''; return; }
+
+  // chart: average ml a day per period, oldest to newest
+  const chartList = list.slice(0, gran === 'week' ? 12 : gran === 'month' ? 12 : 6).reverse();
+  const W = 340, H = 150, padB = 22, padT = 16, bw = W / chartList.length;
+  const vals = chartList.map(p => p.ml / p.days), max = Math.max(1, ...vals);
+  const shortLab = p => gran === 'year' ? p.key : gran === 'month' ? new Date(p.key + '-01T12:00:00').toLocaleDateString('en-GB', {month:'short'}) : (d => d.getDate() + '/' + (d.getMonth() + 1))(new Date(p.key + 'T12:00:00'));
+  const bars = chartList.map((p, i) => {
+    const v = vals[i], h = Math.max(2, (v / max) * (H - padB - padT)), x = i * bw + bw * 0.18, w = bw * 0.64;
+    return `<rect x="${x}" y="${H - padB - h}" width="${w}" height="${h}" rx="4" fill="var(--feed)" opacity="${i === chartList.length - 1 ? 1 : 0.55}"></rect>
+      <text x="${x + w / 2}" y="${H - padB - h - 4}" text-anchor="middle">${Math.round(v)}</text>
+      <text class="lab" x="${x + w / 2}" y="${H - 6}" text-anchor="middle">${shortLab(p)}</text>`;
+  }).join('');
+  $('#histChart').innerHTML = `<h3>Milk a day</h3><svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Average millilitres a day per ${gran}">${bars}</svg>
+    <div class="hint" style="margin-top:4px">Average ml a day for each ${gran}.</div>`;
+
+  $('#histPeriods').innerHTML = `<h3>${gran === 'week' ? 'Weeks' : gran === 'month' ? 'Months' : 'Years'}</h3>` + list.slice(0, gran === 'week' ? 12 : 24).map(p => `
+    <div class="pcard"><div class="pt">${periodLabel(p.key, gran)}</div>
+      <div class="stats">
+        <div><div class="n">${Math.round(p.ml / p.days)}</div><div class="t">ml a day<br>${p.ml.toLocaleString('en-GB')} ml total</div></div>
+        <div><div class="n">${round(p.feeds / p.days, 1)}</div><div class="t">feeds a day<br>${p.feeds} total</div></div>
+        <div><div class="n">${round(p.nappies / p.days, 1)}</div><div class="t">nappies a day<br>${p.wet} wet, ${p.dirty} dirty, ${p.mixed} both</div></div>
+      </div></div>`).join('');
+
+  renderRecords(days);
+
+  // all entries, newest first, a week at a time
+  const cutoff = dayStart(-(view.hdays - 1)).getTime();
+  const filtered = applyFilter(all(), view.hfilter);
+  const shown = filtered.filter(e => e._t >= cutoff);
+  $('#hfilters').innerHTML = FILTERS.map(([k, l]) => `<button class="chip" data-hfilter="${k}" aria-pressed="${view.hfilter === k}">${l}</button>`).join('');
+  $('#hlist').innerHTML = listHtml(shown, true, 'Nothing here yet.') +
+    (filtered.length > shown.length ? `<button class="more" data-more>Show earlier entries</button>` : '');
+}
+function renderRecords(days){
+  const feeds = all().filter(e => e.type === 'feed');
+  const recs = [];
+  const big = feeds.filter(e => ml(e)).sort((a, b) => ml(b) - ml(a))[0];
+  if (big) recs.push([ml(big) + ' ml', 'biggest feed', big._t]);
+  const dl = [...days.values()].filter(d => d.key !== dkey(new Date()));
+  const top = f => dl.slice().sort((a, b) => b[f] - a[f])[0];
+  const dayDate = d => new Date(d.key + 'T12:00:00').getTime();
+  const tm = top('ml'); if (tm && tm.ml) recs.push([tm.ml + ' ml', 'most milk in a day', dayDate(tm)]);
+  const tf = top('feeds'); if (tf && tf.feeds) recs.push([tf.feeds + ' feeds', 'most feeds in a day', dayDate(tf)]);
+  const tn = top('nappies'); if (tn && tn.nappies) recs.push([tn.nappies + ' nappies', 'most in a day', dayDate(tn)]);
+  const asc = feeds.slice().sort((a, b) => a._t - b._t); let gap = 0, gapAt = 0;
+  for (let i = 1; i < asc.length; i++) { const g = asc[i]._t - asc[i - 1]._t; if (g > gap) { gap = g; gapAt = asc[i]._t; } }
+  if (gap) recs.push([dur(gap / 60000), 'longest gap between feeds', gapAt]);
+  const ls = all().filter(e => e.type === 'sleep' && !isOpenSleep(e)).sort((a, b) => b.duration_min - a.duration_min)[0];
+  if (ls) recs.push([dur(ls.duration_min), 'longest sleep logged', ls._t]);
+  $('#records').innerHTML = `<h3>Records</h3><div class="recs">${recs.map(([n, t, at]) =>
+    `<div class="rec"><div class="n">${esc(n)}</div><div class="t">${t}<br>${new Date(at).toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'})}</div></div>`).join('')}</div>`;
 }
 
 /* ---------- sync ---------- */
@@ -431,13 +740,20 @@ async function api(method, body, query){
     body: JSON.stringify(Object.assign({k: cfg.key}, body))});
   return r.json();
 }
-async function refresh(){
+const strip = e => { const c = Object.assign({}, e); delete c._t; return c; };
+function saveCache(){ store.set('bl.cache', entries.map(strip)); }
+async function refresh(full){
   if (isDemo()) return render();
+  const needFull = full || !entries.length || !meta.lastFull || Date.now() - new Date(meta.lastFull).getTime() > 15 * 60000;
   try {
-    const r = await api('GET', null, {action:'list', from: dayStart(-3).toISOString()});
+    const from = needFull ? null : dayStart(-8);
+    const r = await api('GET', null, from ? {action:'list', from: from.toISOString()} : {action:'list'});
     if (!r.ok) throw new Error(r.error);
-    entries = r.entries; store.set('bl.cache', entries);
-    meta = {lastSync: new Date().toISOString(), lastBackup: r.lastBackup, sheetUrl: r.sheetUrl};
+    if (from) entries = entries.filter(e => new Date(e.time).getTime() < from.getTime()).concat(r.entries);
+    else entries = r.entries;
+    dirty(); saveCache();
+    meta = Object.assign(meta, {lastSync: new Date().toISOString(), lastBackup: r.lastBackup, sheetUrl: r.sheetUrl});
+    if (!from) meta.lastFull = meta.lastSync;
     store.set('bl.meta', meta);
     syncState = 'ok';
   } catch (e) { syncState = 'offline'; }
@@ -458,12 +774,13 @@ async function flush(){
   refresh();
 }
 function queue(op){
+  if (op.entry) op.entry = strip(op.entry);
   if (isDemo()) {
     if (op.action === 'delete') entries = entries.filter(e => e.id !== op.id);
     else { entries = entries.filter(e => e.id !== op.entry.id); entries.push(op.entry); }
-    return render();
+    dirty(); return render();
   }
-  outbox.push(op); store.set('bl.outbox', outbox); render(); flush();
+  outbox.push(op); store.set('bl.outbox', outbox); dirty(); render(); flush();
 }
 function saveEntry(e, isNew){
   e.by = e.by || cfg.by || '';
@@ -487,13 +804,13 @@ function toast(msg, undo){
 /* ---------- sheets ---------- */
 let D = null;   // the entry being drafted
 function openSheet(kind, existing){
-  const base = existing ? JSON.parse(JSON.stringify(existing)) : {id: uid(), type: kind, detail:'', amount_ml:'', duration_min:'', value:'', supplements:[], notes:''};
-  D = {kind, isNew: !existing, e: base, when: existing ? 'custom' : 'now', confirmDel: false,
-       timeVal: existing ? hm(new Date(existing.time)) : hm(new Date())};
+  const base = existing ? strip(JSON.parse(JSON.stringify(existing))) : {id: uid(), type: kind, detail:'', amount_ml:'', duration_min:'', value:'', supplements:[], notes:''};
+  base.supplements = [].concat(base.supplements || []);
+  D = {kind, isNew: !existing, e: base, when: existing ? 'custom' : 'now', confirmDel: false, adding: false,
+       custom: toLocalInput(existing ? new Date(existing.time) : new Date())};
   if (kind === 'feed' && !existing) { const last = all().find(x => x.type === 'feed' && !x.detail.startsWith('breast'));
     Object.assign(D.e, {detail: last ? last.detail : 'formula', amount_ml: last && last.amount_ml ? last.amount_ml : 120}); }
   if (kind === 'sleep' && !existing) { D.open = openSleep(); D.e.duration_min = ''; }
-  if (dayOffset === -1 && !existing) D.when = 'custom';
   $('#toast').classList.remove('on');
   drawSheet();
   $('#scrim').classList.add('on'); $('#sheet').classList.add('on');
@@ -503,17 +820,14 @@ function closeSheet(){ $('#scrim').classList.remove('on'); $('#sheet').classList
 function pickedTime(){
   if (D.when === 'now') return new Date();
   if (D.when !== 'custom') return new Date(Date.now() - Number(D.when) * 60000);
-  const [h, m] = D.timeVal.split(':').map(Number);
-  let d = D.isNew ? new Date(dayStart(dayOffset)) : new Date(D.e.time);
-  d.setHours(h, m, 0, 0);
-  if (D.isNew && dayOffset === 0 && d.getTime() > Date.now() + 5 * 60000) d.setDate(d.getDate() - 1);
-  return d;
+  const d = new Date(D.custom);
+  return isNaN(d) ? new Date() : d;
 }
 function timeField(label){
-  const opts = D.isNew && dayOffset === 0 ? [['now','Now'],['15','15m ago'],['30','30m ago'],['60','1h ago'],['custom','Pick']] : [];
+  const opts = D.isNew ? [['now','Now'],['2','2m ago'],['5','5m ago'],['15','15m ago'],['30','30m ago'],['custom','Custom']] : [];
   return `<div class="field"><div class="lab">${label || 'When'}</div>
     ${opts.length ? `<div class="chips">${opts.map(([v, l]) => `<button class="chip" data-when="${v}" aria-pressed="${D.when === v}">${l}</button>`).join('')}</div>` : ''}
-    ${D.when === 'custom' ? `<input type="time" id="timeIn" value="${D.timeVal}" style="margin-top:10px" aria-label="Time">` : ''}</div>`;
+    ${D.when === 'custom' ? `<input type="datetime-local" id="timeIn" value="${D.custom}" style="margin-top:10px" aria-label="Date and time">` : ''}</div>`;
 }
 function supplementsField(){
   return `<div class="field"><div class="lab">Given with this feed</div><div class="chips">
@@ -539,14 +853,13 @@ function drawSheet(){
       <div class="field"><div class="chips">
         <button class="chip" data-det="formula" aria-pressed="${e.detail === 'formula'}">Formula</button>
         <button class="chip" data-det="expressed" aria-pressed="${e.detail === 'expressed'}">Expressed milk</button></div></div>
-      <div class="field"><div class="amount"><button data-ml="-10" aria-label="10 ml less">−</button>
-        <div class="val">${e.amount_ml || 0}<small>ml</small></div><button data-ml="10" aria-label="10 ml more">+</button></div>
-        <div class="chips" style="margin-top:10px">${[60,90,120,150,180].map(v => `<button class="chip" data-mlset="${v}" aria-pressed="${Number(e.amount_ml) === v}">${v}</button>`).join('')}</div></div>`;
+      <div class="field"><div class="lab">Amount</div><div class="amount"><button data-ml="-5" aria-label="5 ml less">−</button>
+        <div class="mid"><input id="mlIn" type="number" inputmode="numeric" min="0" max="500" step="1" value="${e.amount_ml === '' ? '' : e.amount_ml}" aria-label="Amount in ml"><span class="unit">ml</span></div>
+        <button data-ml="5" aria-label="5 ml more">+</button></div></div>`;
     else h += `
       <div class="field"><div class="lab">Side</div><div class="chips">
         ${['left','right','both'].map(s => `<button class="chip" data-det="breast-${s}" aria-pressed="${e.detail === 'breast-' + s}">${s[0].toUpperCase() + s.slice(1)}</button>`).join('')}</div></div>
-      <div class="field"><div class="lab">How long</div><div class="chips">
-        ${[5,10,15,20,30,45].map(v => `<button class="chip" data-dur="${v}" aria-pressed="${Number(e.duration_min) === v}">${v} min</button>`).join('')}</div></div>`;
+      <div class="field"><div class="lab">Minutes</div><input id="durIn" type="number" inputmode="numeric" min="0" value="${e.duration_min === '' ? '' : e.duration_min}" placeholder="e.g. 15"></div>`;
     h += supplementsField() + timeField() + notesField() + footer('Log feed');
   }
   else if (D.kind === 'nappy') {
@@ -558,40 +871,47 @@ function drawSheet(){
   else if (D.kind === 'sleep') {
     if (D.isNew && D.open) {
       h = head('Woke up') + `<p class="hint" style="font-size:15px">Asleep since ${hm(new Date(D.open.time))}, ${ago(D.open.time)} so far.</p>` +
-        timeField('Woke up at') + `<div class="foot"><button class="primary sleep" data-wakesave>Log wake up</button></div>`;
+        timeField('Woke up') + `<div class="foot"><button class="primary sleep" data-wakesave>Log wake up</button></div>`;
     } else {
-      h = head(D.isNew ? 'Log sleep' : 'Edit sleep') + timeField(D.isNew ? 'Fell asleep' : 'Fell asleep at') + `
+      h = head(D.isNew ? 'Log sleep' : 'Edit sleep') + timeField('Fell asleep') + `
         <div class="field"><div class="lab">How long</div><div class="chips">
-          <button class="chip" data-dur="" aria-pressed="${e.duration_min === '' || e.duration_min == null}">Still asleep</button>
+          <button class="chip" data-dur="" aria-pressed="${isOpenSleep(e)}">Still asleep</button>
           ${[30,60,90,120,180].map(v => `<button class="chip" data-dur="${v}" aria-pressed="${Number(e.duration_min) === v}">${dur(v)}</button>`).join('')}
-        </div></div>` + notesField() + footer('Log sleep', 'sleep');
+        </div><input id="durIn" type="number" inputmode="numeric" min="0" value="${e.duration_min === '' ? '' : e.duration_min}" placeholder="Or type minutes" style="margin-top:10px"></div>` + notesField() + footer('Log sleep', 'sleep');
     }
   }
   else if (D.kind === 'other') {
-    const o = OTHER.find(x => x.k === e.detail);
+    const extra = otherTypes();
+    const o = OTHER.find(x => x.k === e.detail) || (e.detail ? {k: e.detail, ic: 'note', ph: 'Details (optional)'} : null);
     h = head(D.isNew ? 'Log something else' : 'Edit') + `
-      <div class="grid4">${OTHER.map(x => `<button class="opt" data-oth="${x.k}" aria-pressed="${e.detail === x.k}">${IC[x.ic]}${x.short || x.k}</button>`).join('')}</div>`;
+      <div class="grid4">${OTHER.map(x => `<button class="opt" data-oth="${esc(x.k)}" aria-pressed="${e.detail === x.k}">${IC[x.ic]}${x.short || x.k}</button>`).join('')}
+      ${extra.map(k => `<button class="opt" data-oth="${esc(k)}" aria-pressed="${e.detail === k}">${IC.note}${esc(k)}</button>`).join('')}
+      <button class="opt" data-addtype aria-pressed="${D.adding}">${IC.plus}New</button></div>
+      ${D.adding ? `<div class="newtype"><input type="text" id="typeIn" placeholder="e.g. Vaccination, Bottle sterilised" maxlength="30"><button data-savetype>Add</button></div>` : ''}`;
     if (o) h += (o.ph ? `<div class="field"><div class="lab">Details</div><input type="text" id="valIn" value="${esc(e.value)}" placeholder="${esc(o.ph)}"></div>` : '') +
       timeField() + notesField() + footer('Log ' + o.k.toLowerCase(), 'other');
   }
   else if (D.kind === 'settings') h = settingsHtml();
   $('#sheetIn').innerHTML = h;
+  const mlIn = $('#mlIn');
+  if (mlIn) mlIn.addEventListener('focus', () => mlIn.select());
 }
 
 function settingsHtml(){
-  const share = cfg.api ? location.origin + location.pathname + '#' + new URLSearchParams({api: cfg.api, k: cfg.key, baby: cfg.baby}) : '';
   return head('Settings') + `
     <div class="field"><div class="lab">Who’s using this phone</div><div class="chips">
       ${['Jordan','Millie'].map(n => `<button class="chip" data-by="${n}" aria-pressed="${cfg.by === n}">${n}</button>`).join('')}</div></div>
     <div class="field"><div class="lab">Baby’s name</div><input type="text" id="babyIn" value="${esc(cfg.baby)}"></div>
     <div class="field"><div class="lab">Supplements shown on feeds</div><input type="text" id="suppIn" value="${esc(cfg.supps.join(', '))}">
       <div class="hint">Separate with commas.</div></div>
+    <div class="field"><div class="lab">Your own “Other” types</div><input type="text" id="customIn" value="${esc(cfg.custom.join(', '))}" placeholder="e.g. Vaccination, Bath toy">
+      <div class="hint">Separate with commas.  Types logged on the other phone show up automatically.</div></div>
     <div class="field"><div class="lab">Google Sheet connection</div>
       <input type="url" id="apiIn" value="${esc(cfg.api)}" placeholder="Web app URL ending in /exec">
       <input type="text" id="keyIn" value="${esc(cfg.key)}" placeholder="App key" style="margin-top:8px" autocomplete="off"></div>
     <button class="primary" data-savesettings style="margin-top:20px">Save settings</button>
-    ${share ? `<button class="ghost" data-share>Copy setup link for another phone</button>` : ''}
-    ${cfg.api ? `<button class="ghost" data-backup>Back up to Google Drive now</button>
+    ${cfg.api ? `<button class="ghost" data-share>Copy setup link for another phone</button>
+      <button class="ghost" data-backup>Back up to Google Drive now</button>
       <div class="hint">Backs up automatically every night at 3am. ${meta.lastBackup ? 'Last backup ' + new Date(meta.lastBackup).toLocaleString('en-GB', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'}) + '.' : ''}
       ${meta.sheetUrl ? `<a class="linky" href="${esc(meta.sheetUrl)}" target="_blank" rel="noopener">Open the full log in Google Sheets</a>` : ''}</div>` : ''}`;
 }
@@ -599,46 +919,68 @@ function settingsHtml(){
 /* ---------- events ---------- */
 document.addEventListener('input', ev => {
   if (!D) return;
-  if (ev.target.id === 'notesIn') D.e.notes = ev.target.value;
-  if (ev.target.id === 'valIn') D.e.value = ev.target.value;
-  if (ev.target.id === 'timeIn') D.timeVal = ev.target.value;
+  const id = ev.target.id, v = ev.target.value;
+  if (id === 'notesIn') D.e.notes = v;
+  if (id === 'valIn') D.e.value = v;
+  if (id === 'timeIn') D.custom = v;
+  if (id === 'mlIn') D.e.amount_ml = v === '' ? '' : Math.max(0, Math.round(Number(v)));
+  if (id === 'durIn') { D.e.duration_min = v === '' ? '' : Math.max(0, Math.round(Number(v)));
+    document.querySelectorAll('[data-dur]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.dur) === String(D.e.duration_min))); }
 });
+document.addEventListener('keydown', ev => { if (ev.key === 'Enter' && ev.target.id === 'typeIn') { ev.preventDefault(); $('[data-savetype]').click(); } });
 document.addEventListener('click', ev => {
   const b = ev.target.closest('button, .scrim');
   if (!b) return;
   const d = b.dataset;
   if (b.id === 'scrim' || 'close' in d) return closeSheet();
   if (b.id === 'settingsBtn') return openSheet('settings');
-  if (b.id === 'dToday') { dayOffset = 0; return renderDay(); }
-  if (b.id === 'dYest') { dayOffset = -1; return renderDay(); }
-  if (d.open) { if (D) closeSheet(); return setTimeout(() => openSheet(d.open), D ? 50 : 0); }
+  if (b.id === 'histBtn') { view.hist = true; view.hdays = 7; window.scrollTo(0, 0); return render(); }
+  if (b.id === 'backBtn') { view.hist = false; window.scrollTo(0, 0); return render(); }
+  if ('day' in d) { view.day = d.day === 'week' ? 'week' : Number(d.day); return renderDay(); }
+  if (d.filter) { view.filter = d.filter; return renderDay(); }
+  if (d.cmp) { view.cmp = d.cmp; return renderCompare(); }
+  if (d.gran) { view.gran = d.gran; return renderHistory(); }
+  if (d.hfilter) { view.hfilter = d.hfilter; view.hdays = 7; return renderHistory(); }
+  if ('more' in d) { view.hdays += 14; return renderHistory(); }
   if (d.firstby) { cfg.by = d.firstby; store.set('bl.cfg', cfg); toast('Hi ' + cfg.by); return renderBanner(); }
   if ('install' in d) { if (installPrompt) { installPrompt.prompt(); installPrompt.userChoice.then(c => { if (c.outcome === 'accepted') store.set('bl.installed', true); installPrompt = null; renderBanner(); }); } return; }
+  if (d.open) { if (D) closeSheet(); return setTimeout(() => openSheet(d.open), 0); }
   if (d.edit) { const e = all().find(x => x.id === d.edit); if (e) openSheet(e.type, e); return; }
-  if ('wake' in d) { const s = openSleep(); if (s) { const e = Object.assign({}, s, {duration_min: Math.max(1, Math.round((Date.now() - new Date(s.time)) / 60000))}); queue({action:'update', entry:e}); toast('Woke up after ' + dur(e.duration_min)); } return; }
+  if ('wake' in d) { const s = openSleep(); if (s) { const e = Object.assign(strip(s), {duration_min: Math.max(1, Math.round((Date.now() - s._t) / 60000))}); queue({action:'update', entry:e}); toast('Woke up after ' + dur(e.duration_min)); } return; }
   if (!D) return;
   const e = D.e;
-  if (d.when) { D.when = d.when; if (d.when === 'custom') D.timeVal = hm(new Date()); }
+  if (d.when) { D.when = d.when; if (d.when === 'custom') D.custom = toLocalInput(new Date()); }
   else if (d.fk) { e.detail = d.fk === 'breast' ? 'breast-both' : 'formula'; if (d.fk === 'breast') e.amount_ml = ''; else { e.amount_ml = e.amount_ml || 120; e.duration_min = ''; } }
   else if (d.det) e.detail = d.det;
   else if (d.ml) e.amount_ml = Math.max(0, (Number(e.amount_ml) || 0) + Number(d.ml));
-  else if (d.mlset) e.amount_ml = Number(d.mlset);
   else if ('dur' in d) e.duration_min = d.dur === '' ? '' : Number(d.dur);
   else if (d.supp) e.supplements = e.supplements.includes(d.supp) ? e.supplements.filter(s => s !== d.supp) : e.supplements.concat(d.supp);
-  else if (d.oth) { e.detail = d.oth; }
+  else if (d.oth) { e.detail = d.oth; D.adding = false; }
+  else if ('addtype' in d) { D.adding = !D.adding; drawSheet(); const i = $('#typeIn'); if (i) i.focus(); return; }
+  else if ('savetype' in d) {
+    const name = ($('#typeIn').value || '').trim().replace(/\s+/g, ' ');
+    if (!name) return;
+    const k = name.charAt(0).toUpperCase() + name.slice(1);
+    if (!BUILTIN_OTHER.includes(k) && !cfg.custom.includes(k)) { cfg.custom.push(k); store.set('bl.cfg', cfg); }
+    e.detail = k; D.adding = false;
+  }
   else if (d.nap) { e.detail = d.nap; if (D.isNew) { e.time = pickedTime().toISOString(); return saveEntry(e, true); } }
   else if (d.by) { cfg.by = d.by; store.set('bl.cfg', cfg); document.querySelectorAll('[data-by]').forEach(x => x.setAttribute('aria-pressed', x.dataset.by === cfg.by)); return; }
-  else if ('save' in d) { e.time = pickedTime().toISOString(); return saveEntry(e, D.isNew); }
-  else if ('wakesave' in d) { const s = Object.assign({}, D.open); s.duration_min = Math.max(1, Math.round((pickedTime() - new Date(s.time)) / 60000)); return saveEntry(s, false); }
+  else if ('save' in d) {
+    if (D.kind === 'feed' && !e.detail.startsWith('breast') && !(Number(e.amount_ml) > 0)) { toast('Type how many ml first'); const i = $('#mlIn'); if (i) i.focus(); return; }
+    e.time = pickedTime().toISOString(); return saveEntry(e, D.isNew);
+  }
+  else if ('wakesave' in d) { const s = strip(D.open); s.duration_min = Math.max(1, Math.round((pickedTime() - new Date(s.time)) / 60000)); return saveEntry(s, false); }
   else if ('del' in d) { if (D.confirmDel) return deleteEntry(e.id); D.confirmDel = true; }
   else if ('savesettings' in d) {
     cfg.baby = $('#babyIn').value.trim() || 'Baby';
     cfg.supps = $('#suppIn').value.split(',').map(s => s.trim()).filter(Boolean);
+    cfg.custom = $('#customIn').value.split(',').map(s => s.trim()).filter(Boolean);
     const api = $('#apiIn').value.trim(), key = $('#keyIn').value.trim();
     const changed = api !== cfg.api || key !== cfg.key;
     cfg.api = api; cfg.key = key; store.set('bl.cfg', cfg);
-    if (changed) { entries = []; store.set('bl.cache', []); }
-    closeSheet(); toast('Settings saved'); return refresh();
+    if (changed) { entries = []; dirty(); saveCache(); }
+    closeSheet(); toast('Settings saved'); return refresh(changed);
   }
   else if ('share' in d) {
     const link = location.origin + location.pathname + '#' + new URLSearchParams({api: cfg.api, k: cfg.key, baby: cfg.baby});
@@ -659,29 +1001,30 @@ function seedDemo(){
   const out = []; const now = Date.now();
   const at = (off, h, m) => { const d = dayStart(off); d.setHours(h, m); return d.toISOString(); };
   const add = (o) => out.push(Object.assign({id: uid(), detail:'', amount_ml:'', duration_min:'', value:'', supplements:[], notes:'', source:'app', by:'Millie'}, o));
-  for (const off of [-1, 0]) {
-    [[0,40,150],[3,55,120],[7,10,150],[10,30,150],[13,45,120],[16,50,180],[20,5,150]].forEach(([h, m, ml], i) => {
-      if (new Date(at(off, h, m)).getTime() > now) return;
-      add({time: at(off, h, m), type:'feed', detail:'formula', amount_ml: ml, supplements: i === 2 ? ['Vitamin D'] : i === 5 ? ['Infacol'] : [], source: i % 3 === 0 ? 'alexa' : 'app', by: i % 2 ? 'Jordan' : 'Millie'});
+  for (let off = -9; off <= 0; off++) {
+    [[0,40,150],[3,55,120],[7,10,150],[10,30,150],[13,45,120],[16,50,180],[20,5,150]].forEach(([h, m, mlv], i) => {
+      const mm = (m + off * 7 + 70) % 60;
+      if (new Date(at(off, h, mm)).getTime() > now) return;
+      add({time: at(off, h, mm), type:'feed', detail:'formula', amount_ml: mlv - ((off + 9) % 3) * 10, supplements: i === 2 ? ['Vitamin D'] : [], source: i % 3 === 0 ? 'alexa' : 'app', by: i % 2 ? 'Jordan' : 'Millie'});
     });
     [[1,0,'wet'],[7,30,'dirty'],[11,0,'wet'],[14,10,'mixed'],[17,20,'wet'],[20,30,'wet']].forEach(([h, m, k], i) => {
       if (new Date(at(off, h, m)).getTime() > now) return;
       add({time: at(off, h, m), type:'nappy', detail: k, source: i % 2 ? 'alexa' : 'app', by:'Jordan'});
     });
-    [[1,20,150],[11,20,75],[14,40,90]].forEach(([h, m, d]) => {
-      if (new Date(at(off, h, m)).getTime() + d * 60000 > now) return;
-      add({time: at(off, h, m), type:'sleep', duration_min: d});
+    [[1,20,150],[11,20,75],[14,40,90]].forEach(([h, m, dd]) => {
+      if (new Date(at(off, h, m)).getTime() + dd * 60000 > now) return;
+      add({time: at(off, h, m), type:'sleep', duration_min: dd});
     });
-    if (new Date(at(off, 18, 30)).getTime() < now) add({time: at(off, 18, 30), type:'other', detail:'Bath'});
   }
   return out;
 }
 
 /* ---------- start ---------- */
 if (isDemo()) entries = seedDemo();
+dirty();
 render();
 refresh(); flush();
-setInterval(() => { renderHero(); if (dayOffset === 0) renderDay(); }, 30000);
+setInterval(() => { if (!view.hist) { renderHero(); if (view.day === 0 || view.day === 'week') renderDay(); } }, 30000);
 setInterval(() => { if (!document.hidden) { refresh(); flush(); } }, 30000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { refresh(); flush(); } });
 window.addEventListener('online', flush);
