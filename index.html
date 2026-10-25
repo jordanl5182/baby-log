@@ -335,6 +335,21 @@ a.icon-btn{color:var(--ink);text-decoration:none}
 .cover img{display:block;width:100%;height:200px;object-fit:cover}
 .cover .chg{position:absolute;right:10px;bottom:10px;background:rgba(15,19,27,.55);color:#fff;border:0;border-radius:var(--r-sm);padding:7px 11px;font-size:12.5px;font-weight:700;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .cover.empty{padding:14px;text-align:center;border-style:dashed}
+[data-head]{cursor:pointer;-webkit-user-select:none;user-select:none;display:flex;align-items:center;gap:8px}
+[data-head]::after{content:"";flex:none;width:7px;height:7px;margin-left:auto;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:translateY(-2px) rotate(45deg);transition:transform .2s}
+.collapsed [data-head]::after{transform:rotate(-45deg)}
+#home > [data-sec].collapsed > :not([data-head]){display:none!important}
+.sechead{font-size:13px;font-weight:700;color:var(--muted);margin:0 2px 8px}
+.ribbon .sechead{margin:0 0 10px}
+.card > h3[data-head]::after{margin-left:6px}
+.coverhead{position:absolute;top:10px;left:10px;margin:0;border:0;background:rgba(15,19,27,.55);color:#fff;border-radius:var(--r-sm);padding:6px 10px;font-size:12.5px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.coverhead::after{border-color:#fff!important}
+.cover.collapsed{border-style:solid}
+.cover.collapsed .coverhead{position:static;width:100%;background:none;color:var(--muted);padding:12px 14px;font-size:13px}
+.cover.collapsed .coverhead::after{border-color:var(--muted)!important}
+.cframe{position:relative;overflow:hidden;border-radius:var(--r-md);border:1px solid var(--line);touch-action:none;cursor:grab}
+.cframe img{display:block;width:100%;object-fit:cover;pointer-events:none;-webkit-user-select:none;user-select:none}
+input[type=range]{width:100%;accent-color:var(--feed)}
 </style>
 </head>
 <body>
@@ -364,7 +379,7 @@ a.icon-btn{color:var(--ink);text-decoration:none}
     <input type="file" id="coverIn" accept="image/*" hidden>
     <input type="file" id="importIn" accept=".csv,.zip,text/csv,application/zip" multiple hidden>
     <section class="hero" aria-live="polite" data-sec="status">
-      <p class="label">Since last feed</p>
+      <p class="label" data-head>Since last feed</p>
       <div class="since" id="since">–</div>
       <p class="what" id="sinceWhat"></p>
       <div id="asleep"></div>
@@ -375,6 +390,7 @@ a.icon-btn{color:var(--ink);text-decoration:none}
     </section>
 
     <div data-sec="log">
+    <div class="sechead" data-head>Log</div>
     <div class="days">
       <div class="seg" role="group" aria-label="Period">
         <button data-day="0" aria-pressed="true">Today</button>
@@ -389,6 +405,7 @@ a.icon-btn{color:var(--ink);text-decoration:none}
     </div>
 
     <div class="ribbon" aria-label="At a glance" data-sec="timeline">
+      <div class="sechead" data-head>Timeline</div>
       <div id="lanesWrap"></div>
       <div class="legend">
         <span><i style="background:var(--feed)"></i>Feed (bigger dot = more ml)</span>
@@ -399,7 +416,7 @@ a.icon-btn{color:var(--ink);text-decoration:none}
       </div>
     </div>
 
-    <div class="totals" id="totals" data-sec="totals"></div>
+    <div data-sec="totals"><div class="sechead" data-head>Totals</div><div class="totals" id="totals"></div></div>
 
     <section class="card" id="compare" data-sec="compare"></section>
 
@@ -595,7 +612,7 @@ function render(){
   document.title = (cfg.baby || 'Baby') + ' log';
   document.body.classList.toggle('hist', view.hist);
   renderStatus(); renderBanner();
-  if (view.hist) renderHistory(); else { applyLayout(); renderCover(); renderHero(); renderFormula(); renderDay(); }
+  if (view.hist) renderHistory(); else { applyLayout(); renderCover(); renderHero(); renderFormula(); renderDay(); applyCollapse(); }
 }
 function renderStatus(){
   const el = $('#status');
@@ -913,7 +930,7 @@ function renderCover(){
   const src = coverSrc();
   el.className = 'cover' + (src ? '' : ' empty');
   el.innerHTML = src
-    ? '<img src="' + src + '" alt="Cover photo of ' + esc(cfg.baby || 'baby') + '"><button class="chg" data-cover>Change photo</button>'
+    ? '<img src="' + src + '" alt="Cover photo of ' + esc(cfg.baby || 'baby') + '" style="' + coverStyle(coverPos()) + '"><button class="sechead coverhead" data-head aria-label="Show or hide the photo">Photo</button><button class="chg" data-editcover>Edit photo</button>'
     : '<button class="linky" data-cover>Add a cover photo from your gallery</button>';
 }
 function saveCover(file){
@@ -933,7 +950,8 @@ function saveCover(file){
     }
     const hid = cfg.hidden || [];
     if (hid.includes('cover')) { cfg.hidden = hid.filter(x => x !== 'cover'); store.set('bl.cfg', cfg); }
-    applyLayout(); renderCover(); toast('Cover photo updated');
+    try { localStorage.removeItem('bl.coverpos'); } catch (e) {}
+    applyLayout(); renderCover(); applyCollapse(); if (D) closeSheet(); openSheet('coveredit'); toast('Drag to position it, then tap Save');
   };
   img.onerror = () => { URL.revokeObjectURL(url); toast('Couldn’t open that photo'); };
   img.src = url;
@@ -1064,6 +1082,60 @@ document.addEventListener('change', async ev => {
   try { const p = await readImportFiles(files); closeSheet(); openSheet('import'); D.pending = p; drawSheet(); }
   catch (e) { toast('Couldn’t read that file'); }
 });
+
+/* ---------- collapsible sections and cover photo position (both remembered on this phone) ---------- */
+function applyCollapse(){
+  document.querySelectorAll('#compare > h3, #formula > h3').forEach(h => h.setAttribute('data-head', ''));
+  const c = cfg.collapsed || [];
+  document.querySelectorAll('#home > [data-sec]').forEach(el => el.classList.toggle('collapsed', c.includes(el.dataset.sec)));
+}
+function toggleCollapse(el){
+  const s = el.closest('[data-sec]'); if (!s) return;
+  const k = s.dataset.sec, c = cfg.collapsed || [];
+  cfg.collapsed = c.includes(k) ? c.filter(x => x !== k) : c.concat(k);
+  store.set('bl.cfg', cfg); applyCollapse();
+}
+document.addEventListener('click', ev => {
+  const hd = ev.target.closest('[data-head]');
+  if (!hd || hd.tagName === 'BUTTON' || ev.target.closest('button, a, input')) return;
+  toggleCollapse(hd);
+});
+function coverPos(){
+  const d = {x: 50, y: 50, z: 1, h: 200};
+  try { return Object.assign(d, JSON.parse(localStorage.getItem('bl.coverpos') || '{}')); } catch (e) { return d; }
+}
+const clampPct = v => Math.max(0, Math.min(100, v));
+function coverStyle(p){
+  return 'height:' + p.h + 'px;object-position:' + p.x + '% ' + p.y + '%;transform:scale(' + p.z + ');transform-origin:' + p.x + '% ' + p.y + '%';
+}
+function coverEditHtml(){
+  if (!D.pos) D.pos = coverPos();
+  const p = D.pos;
+  return head('Cover photo') +
+    '<p class="hint" style="margin-top:0">Drag the photo to move it, and use the slider to zoom in.</p>' +
+    '<div class="cframe" id="cframe" style="height:' + p.h + 'px"><img id="cimg" src="' + coverSrc() + '" alt="" draggable="false" style="' + coverStyle(p) + '"></div>' +
+    '<div class="field"><div class="lab">Zoom</div><input type="range" id="cZoom" min="1" max="3" step="0.01" value="' + p.z + '" aria-label="Zoom"></div>' +
+    '<div class="field"><div class="lab">Size</div><div class="chips">' +
+      [[140, 'Small'], [200, 'Medium'], [260, 'Large'], [340, 'Extra large']].map(s => '<button class="chip" data-ch="' + s[0] + '" aria-pressed="' + (p.h === s[0]) + '">' + s[1] + '</button>').join('') +
+    '</div></div>' +
+    '<div class="foot"><button class="primary" data-savecoverpos>Save</button><button class="ghost" data-cover>Choose a different photo</button></div>';
+}
+function previewCover(){
+  const img = $('#cimg'), fr = $('#cframe'); if (!img || !fr) return;
+  fr.style.height = D.pos.h + 'px'; img.setAttribute('style', coverStyle(D.pos));
+}
+function wireCoverEdit(){
+  const fr = $('#cframe'); if (!fr) return;
+  let start = null;
+  fr.onpointerdown = e => { start = {x: e.clientX, y: e.clientY, px: D.pos.x, py: D.pos.y}; fr.setPointerCapture(e.pointerId); };
+  fr.onpointermove = e => {
+    if (!start) return;
+    D.pos.x = Math.round(clampPct(start.px - (e.clientX - start.x) * 100 / (fr.clientWidth * D.pos.z)) * 10) / 10;
+    D.pos.y = Math.round(clampPct(start.py - (e.clientY - start.y) * 100 / (fr.clientHeight * D.pos.z)) * 10) / 10;
+    previewCover();
+  };
+  fr.onpointerup = fr.onpointercancel = () => { start = null; };
+}
 
 /* ---------- history ---------- */
 function periodKey(d, gran){
@@ -1318,8 +1390,10 @@ function drawSheet(){
   else if (D.kind === 'settings') h = settingsHtml();
   else if (D.kind === 'formula') h = formulaSheetHtml();
   else if (D.kind === 'layout') h = layoutSheetHtml();
+  else if (D.kind === 'coveredit') h = coverEditHtml();
   else if (D.kind === 'import') h = D.pending ? importSheetHtml() : head('Import') + '<p class="hint">Reading the file…</p>';
   $('#sheetIn').innerHTML = h;
+  if (D.kind === 'coveredit') wireCoverEdit();
   const mlIn = $('#mlIn');
   if (mlIn) mlIn.addEventListener('focus', () => mlIn.select());
 }
@@ -1327,6 +1401,7 @@ function drawSheet(){
 function settingsHtml(){
   return head('Settings') + '<button class="ghost" data-open="layout" style="margin-top:0">Customise home screen</button>' +
     '<button class="ghost" data-cover>' + (coverSrc() ? 'Change cover photo' : 'Add a cover photo') + '</button>' +
+    (coverSrc() ? '<button class="ghost" data-editcover>Move or resize cover photo</button>' : '') +
     (coverSrc() ? '<button class="ghost danger" data-removecover>Remove cover photo</button>' : '') +
     '<div class="field"><div class="lab">Import and export</div>' +
       (navigator.canShare ? '<button class="ghost" data-export="share" style="margin-top:0">Export and share (CSV)</button>' : '') +
@@ -1357,6 +1432,7 @@ document.addEventListener('input', ev => {
   if (id === 'notesIn') D.e.notes = v;
   if (id === 'valIn') D.e.value = v;
   if (id === 'timeIn') D.custom = v;
+  if (id === 'cZoom' && D.pos) { D.pos.z = Number(v); previewCover(); }
   if (id === 'mlIn') D.e.amount_ml = v === '' ? '' : Math.max(0, Math.round(Number(v)));
   if (id === 'durIn') { D.e.duration_min = v === '' ? '' : Math.max(0, Math.round(Number(v)));
     document.querySelectorAll('[data-dur]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.dur) === String(D.e.duration_min))); }
@@ -1367,12 +1443,16 @@ document.addEventListener('click', ev => {
   if (!b) return;
   const d = b.dataset;
   if (b.id === 'scrim' || 'close' in d) return closeSheet();
+  if ('head' in d) { toggleCollapse(b); return; }
+  if ('editcover' in d) { if (D) closeSheet(); return openSheet('coveredit'); }
+  if (d.ch && D) { D.pos.h = Number(d.ch); return drawSheet(); }
+  if ('savecoverpos' in d && D) { try { localStorage.setItem('bl.coverpos', JSON.stringify(D.pos)); } catch (e) {} closeSheet(); renderCover(); applyCollapse(); toast('Cover photo saved'); return; }
   if (b.id === 'settingsBtn') return openSheet('settings');
   if (b.id === 'histBtn') { view.hist = true; view.hdays = 7; window.scrollTo(0, 0); return render(); }
   if (b.id === 'backBtn') { view.hist = false; window.scrollTo(0, 0); return render(); }
   if ('day' in d) { view.day = d.day === 'week' ? 'week' : Number(d.day); return renderDay(); }
   if (d.filter) { view.filter = d.filter; return renderDay(); }
-  if (d.cmp) { view.cmp = d.cmp; return renderCompare(); }
+  if (d.cmp) { view.cmp = d.cmp; renderCompare(); return applyCollapse(); }
   if (d.gran) { view.gran = d.gran; return renderHistory(); }
   if (d.hfilter) { view.hfilter = d.hfilter; view.hdays = 7; return renderHistory(); }
   if ('more' in d) { view.hdays += 14; return renderHistory(); }
