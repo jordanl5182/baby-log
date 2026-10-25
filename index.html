@@ -324,6 +324,12 @@ input[type=text],input[type=number],input[type=time],input[type=url],input[type=
 .toast{border-radius:var(--r-md);bottom:calc(96px + env(safe-area-inset-bottom,0px))}
 .backrow .name{font-size:22px!important}
 .legend i.bar{position:static;transform:none;opacity:1;top:auto;left:auto}
+[data-sec="log"] .days{margin:0 0 8px}
+.lrow{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.lrow .ln{flex:1;font-weight:600;font-size:15px}
+.lrow .mv{width:38px;height:38px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);font-size:16px;font-weight:700}
+.lrow .mv:disabled{opacity:.3}
+.lrow .chip{min-width:82px}
 </style>
 </head>
 <body>
@@ -346,7 +352,7 @@ input[type=text],input[type=number],input[type=time],input[type=url],input[type=
   <div id="banner"></div>
 
   <main id="home">
-    <section class="hero" aria-live="polite">
+    <section class="hero" aria-live="polite" data-sec="status">
       <p class="label">Since last feed</p>
       <div class="since" id="since">–</div>
       <p class="what" id="sinceWhat"></p>
@@ -357,6 +363,7 @@ input[type=text],input[type=number],input[type=time],input[type=url],input[type=
       </div>
     </section>
 
+    <div data-sec="log">
     <div class="days">
       <div class="seg" role="group" aria-label="Period">
         <button data-day="0" aria-pressed="true">Today</button>
@@ -368,8 +375,9 @@ input[type=text],input[type=number],input[type=time],input[type=url],input[type=
 
     <div class="filters" id="filters" role="group" aria-label="Show" style="margin-top:8px"></div>
     <div class="list" id="list"></div>
+    </div>
 
-    <div class="ribbon" aria-label="At a glance" style="margin-top:14px">
+    <div class="ribbon" aria-label="At a glance" data-sec="timeline">
       <div id="lanesWrap"></div>
       <div class="legend">
         <span><i style="background:var(--feed)"></i>Feed (bigger dot = more ml)</span>
@@ -380,11 +388,13 @@ input[type=text],input[type=number],input[type=time],input[type=url],input[type=
       </div>
     </div>
 
-    <div class="totals" id="totals"></div>
+    <div class="totals" id="totals" data-sec="totals"></div>
 
-    <section class="card" id="compare"></section>
+    <section class="card" id="compare" data-sec="compare"></section>
 
-    <section class="card" id="formula"></section>
+    <section class="card" id="formula" data-sec="formula"></section>
+
+    <div id="customise" style="text-align:center;margin-top:18px"><button class="linky" data-open="layout">Customise this screen</button></div>
   </main>
 
   <main id="history">
@@ -574,7 +584,7 @@ function render(){
   document.title = (cfg.baby || 'Baby') + ' log';
   document.body.classList.toggle('hist', view.hist);
   renderStatus(); renderBanner();
-  if (view.hist) renderHistory(); else { renderHero(); renderFormula(); renderDay(); }
+  if (view.hist) renderHistory(); else { applyLayout(); renderHero(); renderFormula(); renderDay(); }
 }
 function renderStatus(){
   const el = $('#status');
@@ -852,6 +862,37 @@ function openTin(){
   toast('New ' + f.tin + ' g tin started' + (sp > 0 ? ', ' + (sp - 1) + ' spare left' : ''));
 }
 
+/* ---------- home screen layout ---------- */
+const SECTIONS = [['status', 'Since last feed'], ['log', 'Log'], ['timeline', 'Timeline'], ['totals', 'Totals'], ['compare', 'Compare'], ['formula', 'Formula stock']];
+const DEFAULT_LAYOUT = SECTIONS.map(s => s[0]);
+function layout(){
+  const saved = Array.isArray(cfg.layout) ? cfg.layout.filter(k => DEFAULT_LAYOUT.includes(k)) : [];
+  return saved.concat(DEFAULT_LAYOUT.filter(k => !saved.includes(k)));
+}
+function applyLayout(){
+  const home = $('#home'), hidden = cfg.hidden || [];
+  let first = true;
+  layout().forEach(k => {
+    const el = home.querySelector('[data-sec="' + k + '"]'); if (!el) return;
+    home.appendChild(el);
+    const hide = hidden.includes(k);
+    el.style.display = hide ? 'none' : '';
+    if (!hide) { el.style.marginTop = first ? '0' : '14px'; first = false; }
+  });
+  const c = $('#customise'); if (c) home.appendChild(c);
+}
+function layoutSheetHtml(){
+  const L = layout(), hidden = cfg.hidden || [];
+  const name = k => SECTIONS.find(s => s[0] === k)[1];
+  return head('Customise home screen') +
+    '<p class="hint" style="margin-top:0">Use the arrows to move sections up or down, and hide the ones you don’t need.  This only changes this phone.</p>' +
+    L.map((k, i) => '<div class="lrow"><span class="ln">' + name(k) + '</span>' +
+      '<button class="mv" data-mv="' + k + ':-1" aria-label="Move ' + name(k) + ' up"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
+      '<button class="mv" data-mv="' + k + ':1" aria-label="Move ' + name(k) + ' down"' + (i === L.length - 1 ? ' disabled' : '') + '>↓</button>' +
+      '<button class="chip" data-hide="' + k + '" aria-pressed="' + !hidden.includes(k) + '">' + (hidden.includes(k) ? 'Hidden' : 'Shown') + '</button></div>').join('') +
+    '<button class="ghost" data-resetlayout>Reset to default</button>';
+}
+
 /* ---------- history ---------- */
 function periodKey(d, gran){
   if (gran === 'year') return String(d.getFullYear());
@@ -1104,13 +1145,14 @@ function drawSheet(){
   }
   else if (D.kind === 'settings') h = settingsHtml();
   else if (D.kind === 'formula') h = formulaSheetHtml();
+  else if (D.kind === 'layout') h = layoutSheetHtml();
   $('#sheetIn').innerHTML = h;
   const mlIn = $('#mlIn');
   if (mlIn) mlIn.addEventListener('focus', () => mlIn.select());
 }
 
 function settingsHtml(){
-  return head('Settings') + `
+  return head('Settings') + '<button class="ghost" data-open="layout" style="margin-top:0">Customise home screen</button>' + `
     <div class="field"><div class="lab">Who’s using this phone</div><div class="chips">
       ${['Jordan','Millie'].map(n => `<button class="chip" data-by="${n}" aria-pressed="${cfg.by === n}">${n}</button>`).join('')}</div></div>
     <div class="field"><div class="lab">Baby’s name</div><input type="text" id="babyIn" value="${esc(cfg.baby)}"></div>
@@ -1159,6 +1201,17 @@ document.addEventListener('click', ev => {
   if (d.open) { if (D) closeSheet(); return setTimeout(() => openSheet(d.open), 0); }
   if ('opentin' in d) return openTin();
   if ('savestock' in d) return saveStock();
+  if (d.mv) {
+    const parts = d.mv.split(':'), L = layout(), i = L.indexOf(parts[0]), j = i + Number(parts[1]);
+    if (j >= 0 && j < L.length) { L.splice(i, 1); L.splice(j, 0, parts[0]); cfg.layout = L; store.set('bl.cfg', cfg); applyLayout(); }
+    return drawSheet();
+  }
+  if (d.hide) {
+    const H = cfg.hidden || [];
+    cfg.hidden = H.includes(d.hide) ? H.filter(x => x !== d.hide) : H.concat(d.hide);
+    store.set('bl.cfg', cfg); applyLayout(); return drawSheet();
+  }
+  if ('resetlayout' in d) { delete cfg.layout; cfg.hidden = []; store.set('bl.cfg', cfg); applyLayout(); return drawSheet(); }
   if (d.spares) { const i = $('#fSpares'); i.value = Math.max(0, (Number(i.value) || 0) + Number(d.spares)); return; }
   if (d.edit) { const e = all().find(x => x.id === d.edit); if (e) openSheet(e.type, e); return; }
   if ('wake' in d) { const s = openSleep(); if (s) { const e = Object.assign(strip(s), {duration_min: Math.max(1, Math.round((Date.now() - s._t) / 60000))}); queue({action:'update', entry:e}); toast('Woke up after ' + dur(e.duration_min)); } return; }
