@@ -362,6 +362,7 @@ a.icon-btn{color:var(--ink);text-decoration:none}
   <main id="home">
     <section class="cover" id="cover" data-sec="cover"></section>
     <input type="file" id="coverIn" accept="image/*" hidden>
+    <input type="file" id="importIn" accept=".csv,.zip,text/csv,application/zip" multiple hidden>
     <section class="hero" aria-live="polite" data-sec="status">
       <p class="label">Since last feed</p>
       <div class="since" id="since">–</div>
@@ -939,6 +940,131 @@ function saveCover(file){
 }
 document.addEventListener('change', ev => { if (ev.target.id === 'coverIn') { saveCover(ev.target.files[0]); ev.target.value = ''; } });
 
+/* ---------- import and export ---------- */
+function csvCell(v){ v = v == null ? '' : String(v); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+function parseCsvText(t){
+  const rows = []; let r = [], f = '', q = false;
+  t = t.replace(/^\uFEFF/, '');
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i];
+    if (q) { if (c === '"') { if (t[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { r.push(f); f = ''; }
+    else if (c === '\n') { r.push(f); rows.push(r); r = []; f = ''; }
+    else if (c !== '\r') f += c;
+  }
+  if (f || r.length) { r.push(f); rows.push(r); }
+  return rows.filter(x => x.some(v => v !== ''));
+}
+function hashId(s){ let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); }
+function downloadFile(file){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = file.name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+}
+function exportFile(){
+  const cols = ['id', 'time', 'date', 'clock', 'type', 'detail', 'amount_ml', 'duration_min', 'value', 'supplements', 'notes', 'source', 'by'];
+  const list = all().concat(stockList()).slice().sort((a, b) => a._t - b._t);
+  const lines = list.map(e => { const d = new Date(e.time); return [e.id, e.time, dkey(d), hm(d), e.type, e.detail, e.amount_ml, e.duration_min, e.value,
+    [].concat(e.supplements || []).join(', '), e.notes, e.source, e.by].map(csvCell).join(','); });
+  const name = (cfg.baby || 'baby').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-log-' + dkey(new Date()) + '.csv';
+  return new File([cols.join(',') + '\n' + lines.join('\n') + '\n'], name, {type: 'text/csv'});
+}
+const num = v => (v === '' || v == null || isNaN(Number(v))) ? '' : Number(v);
+function fromOwnCsv(rows){
+  const hd = rows[0].map(h => h.trim().toLowerCase()), ix = k => hd.indexOf(k);
+  return rows.slice(1).map(r => {
+    const g = k => ix(k) < 0 ? '' : (r[ix(k)] || '').trim();
+    const t = new Date(g('time')); if (isNaN(t) || !g('type')) return null;
+    return {id: g('id') || 'imp-' + hashId(g('time') + g('type') + g('detail') + g('amount_ml') + g('value')), time: t.toISOString(), type: g('type'), detail: g('detail'),
+      amount_ml: num(g('amount_ml')), duration_min: num(g('duration_min')), value: g('value'),
+      supplements: g('supplements').split(',').map(s => s.trim()).filter(Boolean), notes: g('notes'), source: g('source') || 'import', by: g('by')};
+  }).filter(Boolean);
+}
+function fromBabyTracker(kind, rows){
+  const out = [];
+  const when = s => { const m = String(s).match(/(\d+)\/(\d+)\/(\d+)\s+(\d+):(\d+)/); return m ? new Date(+m[3], +m[2] - 1, +m[1], +m[4], +m[5]) : null; };
+  const note = v => String(v || '').replace(/\\n/g, ' ').trim();
+  const add = (r, type, detail, extra) => {
+    const t = when(r[1]); if (!t) return;
+    const e = Object.assign({time: t.toISOString(), type: type, detail: detail, amount_ml: '', duration_min: '', value: '', supplements: [], notes: '', source: 'baby-tracker', by: ''}, extra || {});
+    e.id = 'bti-' + hashId(kind + r[1] + type + detail + e.amount_ml + e.duration_min + e.value + e.notes);
+    out.push(e);
+  };
+  rows.slice(1).forEach(r => {
+    if (!r[1]) return;
+    if (kind === 'diaper') { const s = String(r[2]).toLowerCase();
+      if (s === 'dry') add(r, 'other', 'Note', {value: 'Dry nappy', notes: note(r[3])});
+      else add(r, 'nappy', s === 'mixed' ? 'mixed' : s === 'dirty' ? 'dirty' : 'wet', {notes: note(r[3])}); }
+    else if (kind === 'formula' || kind === 'expressed') add(r, 'feed', kind, {amount_ml: num(r[2]), notes: note(r[3]), supplements: /infacol/i.test(r[3]) ? ['Infacol'] : []});
+    else if (kind === 'nursing') { const L = num(r[3]), R = num(r[4]);
+      add(r, 'feed', 'breast-' + (L !== '' && R !== '' ? 'both' : L !== '' ? 'left' : R !== '' ? 'right' : 'both'), {duration_min: num(r[5]), notes: note(r[6])}); }
+    else if (kind === 'sleep') add(r, 'sleep', '', {duration_min: num(r[2]) || 1, notes: note(r[3])});
+    else if (kind === 'supplement') { const raw = String(r[2]).trim(), k = raw.toLowerCase();
+      const name = /^ca?pol/.test(k) ? 'Calpol' : /dyoral|dioral/.test(k) ? 'Dioralyte' : raw.charAt(0).toUpperCase() + raw.slice(1);
+      const unit = String(r[4] || '').trim(), amt = r[3] ? ' ' + r[3] + (unit && unit !== String(r[3]) ? ' ' + unit : '') : '';
+      add(r, 'other', /calpol|lactulose|dioralyte/i.test(name) ? 'Medicine' : 'Supplement', {value: (name + amt).slice(0, 60), notes: note(r[5])}); }
+    else if (kind === 'temperature') add(r, 'other', 'Temperature', {value: r[2] + ' °C', notes: note(r[3])});
+  });
+  return out;
+}
+function loadScript(src){ return new Promise((ok, fail) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = fail; document.head.appendChild(s); }); }
+async function readImportFiles(files){
+  const texts = [];
+  for (const f of files) {
+    if (/\.zip$/i.test(f.name) || f.type === 'application/zip' || f.type === 'application/x-zip-compressed') {
+      if (!window.JSZip) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
+      const zip = await JSZip.loadAsync(f);
+      for (const n of Object.keys(zip.files)) if (/\.csv$/i.test(n)) texts.push([n, await zip.files[n].async('string')]);
+    } else texts.push([f.name, await f.text()]);
+  }
+  let found = [];
+  for (const [name, text] of texts) {
+    const rows = parseCsvText(text); if (rows.length < 2) continue;
+    const bt = String(name).toLowerCase().match(/(diaper|formula|expressed|nursing|sleep|supplement|temperature)\.csv$/);
+    const hd = rows[0].map(h => h.trim().toLowerCase());
+    if (hd.includes('type') && hd.includes('time')) found = found.concat(fromOwnCsv(rows));
+    else if (bt) found = found.concat(fromBabyTracker(bt[1], rows));
+  }
+  // leave out anything already in the log
+  const have = all().concat(stockList()), ids = new Set(have.map(e => e.id));
+  const near = e => { const t = new Date(e.time).getTime(); return have.some(x => x.type === e.type && x.detail === e.detail && Math.abs(x._t - t) <= 60000); };
+  const fresh = [], seen = new Set();
+  for (const e of found) { if (ids.has(e.id) || seen.has(e.id) || near(e)) continue; seen.add(e.id); fresh.push(e); }
+  return {total: found.length, fresh: fresh};
+}
+function importSheetHtml(){
+  const p = D.pending, c = k => p.fresh.filter(e => e.type === k).length;
+  if (!p.total) return head('Import') + '<p class="hint" style="font-size:15px;margin-top:0">I couldn’t find any entries in that file.  You can import a CSV exported from this app, or the CSV or zip export from the Baby Tracker app.</p>';
+  if (!p.fresh.length) return head('Import') + '<p class="hint" style="font-size:15px;margin-top:0">Everything in that file (' + p.total + ' entries) is already in your log.  Nothing to add.</p>';
+  const ts = p.fresh.map(e => new Date(e.time).getTime());
+  return head('Import') +
+    '<p style="margin:0 0 6px;font-size:15px;line-height:1.5"><b>' + p.fresh.length + ' new entries</b> from ' + fmtShort(new Date(Math.min.apply(null, ts))) + ' to ' + fmtShort(new Date(Math.max.apply(null, ts))) + '.</p>' +
+    '<p class="hint" style="margin-top:0">' + c('feed') + ' feeds, ' + c('nappy') + ' nappies, ' + c('sleep') + ' sleeps, ' + (c('other') + c('stock')) + ' other.' +
+    (p.total > p.fresh.length ? '  ' + (p.total - p.fresh.length) + ' entries are already in your log and will be skipped.' : '') + '</p>' +
+    '<div class="foot"><button class="primary" data-doimport>Import ' + p.fresh.length + ' entries</button></div>';
+}
+async function doImport(){
+  const list = D.pending.fresh.map(strip);
+  closeSheet();
+  if (isDemo()) { entries = entries.concat(list); dirty(); render(); return toast('Imported ' + list.length + ' entries'); }
+  try {
+    for (let i = 0; i < list.length; i += 400) {
+      toast('Importing… ' + Math.min(i + 400, list.length) + ' of ' + list.length);
+      const r = await api('POST', {action: 'bulk', entries: list.slice(i, i + 400)});
+      if (!r.ok) throw new Error(r.error);
+    }
+    toast('Imported ' + list.length + ' entries');
+    refresh(true);
+  } catch (e) { toast('Import stopped: couldn’t reach your Sheet. Try again and it will carry on.'); refresh(true); }
+}
+document.addEventListener('change', async ev => {
+  if (ev.target.id !== 'importIn' || !ev.target.files.length) return;
+  const files = [...ev.target.files]; ev.target.value = '';
+  toast('Reading file…');
+  try { const p = await readImportFiles(files); closeSheet(); openSheet('import'); D.pending = p; drawSheet(); }
+  catch (e) { toast('Couldn’t read that file'); }
+});
+
 /* ---------- history ---------- */
 function periodKey(d, gran){
   if (gran === 'year') return String(d.getFullYear());
@@ -1192,6 +1318,7 @@ function drawSheet(){
   else if (D.kind === 'settings') h = settingsHtml();
   else if (D.kind === 'formula') h = formulaSheetHtml();
   else if (D.kind === 'layout') h = layoutSheetHtml();
+  else if (D.kind === 'import') h = D.pending ? importSheetHtml() : head('Import') + '<p class="hint">Reading the file…</p>';
   $('#sheetIn').innerHTML = h;
   const mlIn = $('#mlIn');
   if (mlIn) mlIn.addEventListener('focus', () => mlIn.select());
@@ -1200,7 +1327,12 @@ function drawSheet(){
 function settingsHtml(){
   return head('Settings') + '<button class="ghost" data-open="layout" style="margin-top:0">Customise home screen</button>' +
     '<button class="ghost" data-cover>' + (coverSrc() ? 'Change cover photo' : 'Add a cover photo') + '</button>' +
-    (coverSrc() ? '<button class="ghost danger" data-removecover>Remove cover photo</button>' : '') + `
+    (coverSrc() ? '<button class="ghost danger" data-removecover>Remove cover photo</button>' : '') +
+    '<div class="field"><div class="lab">Import and export</div>' +
+      (navigator.canShare ? '<button class="ghost" data-export="share" style="margin-top:0">Export and share (CSV)</button>' : '') +
+      '<button class="ghost" data-export="download"' + (navigator.canShare ? '' : ' style="margin-top:0"') + '>Download all data (CSV)</button>' +
+      '<button class="ghost" data-import>Import from a file</button>' +
+      '<div class="hint">Imports CSV files exported from this app, or the CSV or zip export from Baby Tracker.  Entries already in your log are skipped.</div></div>' + `
     <div class="field"><div class="lab">Who’s using this phone</div><div class="chips">
       ${['Jordan','Millie'].map(n => `<button class="chip" data-by="${n}" aria-pressed="${cfg.by === n}">${n}</button>`).join('')}</div></div>
     <div class="field"><div class="lab">Baby’s name</div><input type="text" id="babyIn" value="${esc(cfg.baby)}"></div>
@@ -1250,6 +1382,14 @@ document.addEventListener('click', ev => {
   if ('opentin' in d) return openTin();
   if ('savestock' in d) return saveStock();
   if ('cover' in d) { $('#coverIn').click(); return; }
+  if (d.export) {
+    const f = exportFile();
+    if (d.export === 'share' && navigator.canShare && navigator.canShare({files: [f]})) navigator.share({files: [f], title: f.name}).catch(() => {});
+    else { downloadFile(f); toast('Saved ' + f.name); }
+    return;
+  }
+  if ('import' in d) { $('#importIn').click(); return; }
+  if ('doimport' in d) return doImport();
   if ('removecover' in d) { try { localStorage.removeItem('bl.cover'); } catch (e) {} delete mem['bl.cover']; renderCover(); closeSheet(); toast('Cover photo removed'); return; }
   if (d.mv) {
     const parts = d.mv.split(':'), L = layout(), i = L.indexOf(parts[0]), j = i + Number(parts[1]);
