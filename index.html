@@ -331,6 +331,10 @@ input[type=text],input[type=number],input[type=time],input[type=url],input[type=
 .lrow .mv:disabled{opacity:.3}
 .lrow .chip{min-width:82px}
 a.icon-btn{color:var(--ink);text-decoration:none}
+.cover{position:relative;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--line);background:var(--surface)}
+.cover img{display:block;width:100%;height:200px;object-fit:cover}
+.cover .chg{position:absolute;right:10px;bottom:10px;background:rgba(15,19,27,.55);color:#fff;border:0;border-radius:var(--r-sm);padding:7px 11px;font-size:12.5px;font-weight:700;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.cover.empty{padding:14px;text-align:center;border-style:dashed}
 </style>
 </head>
 <body>
@@ -356,6 +360,8 @@ a.icon-btn{color:var(--ink);text-decoration:none}
   <div id="banner"></div>
 
   <main id="home">
+    <section class="cover" id="cover" data-sec="cover"></section>
+    <input type="file" id="coverIn" accept="image/*" hidden>
     <section class="hero" aria-live="polite" data-sec="status">
       <p class="label">Since last feed</p>
       <div class="since" id="since">–</div>
@@ -588,7 +594,7 @@ function render(){
   document.title = (cfg.baby || 'Baby') + ' log';
   document.body.classList.toggle('hist', view.hist);
   renderStatus(); renderBanner();
-  if (view.hist) renderHistory(); else { applyLayout(); renderHero(); renderFormula(); renderDay(); }
+  if (view.hist) renderHistory(); else { applyLayout(); renderCover(); renderHero(); renderFormula(); renderDay(); }
 }
 function renderStatus(){
   const el = $('#status');
@@ -867,11 +873,13 @@ function openTin(){
 }
 
 /* ---------- home screen layout ---------- */
-const SECTIONS = [['status', 'Since last feed'], ['log', 'Log'], ['timeline', 'Timeline'], ['totals', 'Totals'], ['compare', 'Compare'], ['formula', 'Formula stock']];
+const SECTIONS = [['cover', 'Cover photo'], ['status', 'Since last feed'], ['log', 'Log'], ['timeline', 'Timeline'], ['totals', 'Totals'], ['compare', 'Compare'], ['formula', 'Formula stock']];
 const DEFAULT_LAYOUT = SECTIONS.map(s => s[0]);
 function layout(){
-  const saved = Array.isArray(cfg.layout) ? cfg.layout.filter(k => DEFAULT_LAYOUT.includes(k)) : [];
-  return saved.concat(DEFAULT_LAYOUT.filter(k => !saved.includes(k)));
+  const out = Array.isArray(cfg.layout) ? cfg.layout.filter(k => DEFAULT_LAYOUT.includes(k)) : [];
+  // sections added in later versions go in at their default position
+  DEFAULT_LAYOUT.forEach((k, i) => { if (!out.includes(k)) out.splice(Math.min(i, out.length), 0, k); });
+  return out;
 }
 function applyLayout(){
   const home = $('#home'), hidden = cfg.hidden || [];
@@ -896,6 +904,40 @@ function layoutSheetHtml(){
       '<button class="chip" data-hide="' + k + '" aria-pressed="' + !hidden.includes(k) + '">' + (hidden.includes(k) ? 'Hidden' : 'Shown') + '</button></div>').join('') +
     '<button class="ghost" data-resetlayout>Reset to default</button>';
 }
+
+/* ---------- cover photo (kept on this phone only) ---------- */
+function coverSrc(){ try { return localStorage.getItem('bl.cover') || ''; } catch (e) { return mem['bl.cover'] || ''; } }
+function renderCover(){
+  const el = $('#cover'); if (!el) return;
+  const src = coverSrc();
+  el.className = 'cover' + (src ? '' : ' empty');
+  el.innerHTML = src
+    ? '<img src="' + src + '" alt="Cover photo of ' + esc(cfg.baby || 'baby') + '"><button class="chg" data-cover>Change photo</button>'
+    : '<button class="linky" data-cover>Add a cover photo from your gallery</button>';
+}
+function saveCover(file){
+  if (!file) return;
+  const url = URL.createObjectURL(file), img = new Image();
+  img.onload = () => {
+    const max = 1400, scale = Math.min(1, max / Math.max(img.width, img.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    URL.revokeObjectURL(url);
+    let data = c.toDataURL('image/jpeg', 0.82);
+    try { localStorage.setItem('bl.cover', data); }
+    catch (e) {
+      try { data = c.toDataURL('image/jpeg', 0.6); localStorage.setItem('bl.cover', data); }
+      catch (e2) { mem['bl.cover'] = data; toast('That photo is too big to keep. Try a smaller one.'); }
+    }
+    const hid = cfg.hidden || [];
+    if (hid.includes('cover')) { cfg.hidden = hid.filter(x => x !== 'cover'); store.set('bl.cfg', cfg); }
+    applyLayout(); renderCover(); toast('Cover photo updated');
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); toast('Couldn’t open that photo'); };
+  img.src = url;
+}
+document.addEventListener('change', ev => { if (ev.target.id === 'coverIn') { saveCover(ev.target.files[0]); ev.target.value = ''; } });
 
 /* ---------- history ---------- */
 function periodKey(d, gran){
@@ -1156,7 +1198,9 @@ function drawSheet(){
 }
 
 function settingsHtml(){
-  return head('Settings') + '<button class="ghost" data-open="layout" style="margin-top:0">Customise home screen</button>' + `
+  return head('Settings') + '<button class="ghost" data-open="layout" style="margin-top:0">Customise home screen</button>' +
+    '<button class="ghost" data-cover>' + (coverSrc() ? 'Change cover photo' : 'Add a cover photo') + '</button>' +
+    (coverSrc() ? '<button class="ghost danger" data-removecover>Remove cover photo</button>' : '') + `
     <div class="field"><div class="lab">Who’s using this phone</div><div class="chips">
       ${['Jordan','Millie'].map(n => `<button class="chip" data-by="${n}" aria-pressed="${cfg.by === n}">${n}</button>`).join('')}</div></div>
     <div class="field"><div class="lab">Baby’s name</div><input type="text" id="babyIn" value="${esc(cfg.baby)}"></div>
@@ -1205,6 +1249,8 @@ document.addEventListener('click', ev => {
   if (d.open) { if (D) closeSheet(); return setTimeout(() => openSheet(d.open), 0); }
   if ('opentin' in d) return openTin();
   if ('savestock' in d) return saveStock();
+  if ('cover' in d) { $('#coverIn').click(); return; }
+  if ('removecover' in d) { try { localStorage.removeItem('bl.cover'); } catch (e) {} delete mem['bl.cover']; renderCover(); closeSheet(); toast('Cover photo removed'); return; }
   if (d.mv) {
     const parts = d.mv.split(':'), L = layout(), i = L.indexOf(parts[0]), j = i + Number(parts[1]);
     if (j >= 0 && j < L.length) { L.splice(i, 1); L.splice(j, 0, parts[0]); cfg.layout = L; store.set('bl.cfg', cfg); applyLayout(); }
